@@ -12,3 +12,144 @@
   <section class="contact">...</section>
 </body>
 </html>
+/* ===== Reset & Base ===== */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: #0D1117;
+  color: #E6EDF3;
+  font-family: 'Inter', -apple-system, sans-serif;
+  line-height: 1.6;
+}
+
+/* ===== Hero ===== */
+.hero {
+  min-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 5vw;
+  max-width: 900px;
+}
+
+.hero h1 {
+  font-family: 'Georgia', serif;
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 1.2rem;
+}
+
+.hero .accent {
+  color: #E3B341; /* vàng gold - nhấn số liệu/độ tin cậy */
+}
+
+.hero p {
+  font-size: 1.1rem;
+  color: #8B949E;
+  max-width: 600px;
+}
+
+/* ===== Số liệu nổi bật (kiểu "81 checks", "6 sheets") ===== */
+.stats {
+  display: flex;
+  gap: 3rem;
+  flex-wrap: wrap;
+  margin-top: 2.5rem;
+}
+
+.stat-number {
+  font-family: 'Georgia', serif;
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #E3B341;
+  display: block;
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  color: #8B949E;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ===== Case Studies ===== */
+.case-studies {
+  padding: 5vw;
+  border-top: 1px solid #21262D;
+}
+
+.case-card {
+  background: #161B22;
+  border: 1px solid #21262D;
+  border-radius: 8px;
+  padding: 2rem;
+  margin-bottom: 1.5rem;
+  transition: border-color 0.2s ease;
+}
+
+.case-card:hover {
+  border-color: #E3B341;
+}
+
+.case-card h3 {
+  font-size: 1.3rem;
+  margin-bottom: 0.8rem;
+}
+
+.case-card .tag {
+  display: inline-block;
+  font-size: 0.75rem;
+  background: #21262D;
+  color: #E3B341;
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}
+
+/* ===== Skills ===== */
+.skills {
+  padding: 5vw;
+  border-top: 1px solid #21262D;
+}
+
+.skill-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.skill-item {
+  background: #161B22;
+  padding: 1rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+/* ===== Contact ===== */
+.contact {
+  padding: 5vw;
+  text-align: center;
+  border-top: 1px solid #21262D;
+}
+
+.contact a.btn {
+  display: inline-block;
+  background: #E3B341;
+  color: #0D1117;
+  padding: 0.8rem 2rem;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 600;
+  margin-top: 1rem;
+  transition: opacity 0.2s ease;
+}
+
+.contact a.btn:hover { opacity: 0.85; }
+
+/* ===== Responsive ===== */
+@media (max-width: 600px) {
+  .hero, .case-studies, .skills, .contact { padding: 6vw 5vw; }
+  .stats { gap: 2rem; }
+}
