@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VNM Expense Variance & SG&A Deep-Dive</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f2f5;color:#333}
+.header{background:linear-gradient(135deg,#1a1a2e,#16213e);padding:24px 32px;color:#fff}
+.header h1{font-size:22px;font-weight:600}
+.header p{font-size:13px;opacity:.7;margin-top:4px}
+.controls{display:flex;gap:16px;padding:14px 32px;background:#fff;border-bottom:1px solid #e0e0e0;flex-wrap:wrap;align-items:center}
+.controls label{font-size:12px;font-weight:600;color:#555}
+.controls select{padding:5px 10px;border:1px solid #ccc;border-radius:6px;font-size:12px}
+.container{max-width:1440px;margin:0 auto;padding:20px 32px}
+.kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:18px}
+.kpi{background:#fff;border-radius:10px;padding:14px 16px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.kpi .label{font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.5px}
+.kpi .value{font-size:20px;font-weight:700;margin:3px 0}
+.kpi .sub{font-size:11px}
+.pos{color:#2e7d32}.neg{color:#c62828}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.grid1{margin-bottom:16px}
+.card{background:#fff;border-radius:10px;padding:18px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.card h3{font-size:13px;font-weight:600;margin-bottom:10px;color:#1a1a2e}
+canvas{max-height:300px}
+table{width:100%;border-collapse:collapse;font-size:11px}
+th{background:#2F5496;color:#fff;padding:7px 8px;text-align:left;font-weight:600;position:sticky;top:0}
+td{padding:6px 8px;border-bottom:1px solid #eee}
+tr:hover{background:#f5f7fa}
+.right{text-align:right}
+.tfoot td{font-weight:700;background:#e8f0fe;border-top:2px solid #2F5496}
+.tab-bar{display:flex;gap:0;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.08);margin:16px 32px 0}
+.tab-bar button{flex:1;padding:11px 8px;border:none;background:#fff;font-size:12px;font-weight:600;color:#888;cursor:pointer;transition:.2s;white-space:nowrap}
+.tab-bar button.active{background:#2F5496;color:#fff}
+.tab-bar button:hover:not(.active){background:#e8f0fe;color:#2F5496}
+.scroll-table{max-height:400px;overflow-y:auto}
+.commentary{background:#fff;border-radius:10px;padding:20px 24px;box-shadow:0 1px 4px rgba(0,0,0,.08);margin-bottom:16px;border-left:4px solid #2F5496}
+.commentary h3{font-size:14px;font-weight:700;margin-bottom:12px;color:#1a1a2e}
+.commentary .insight{margin-bottom:10px;padding:10px 14px;background:#f8f9fb;border-radius:8px;font-size:12px;line-height:1.6}
+.commentary .insight .tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-right:6px}
+.tag-driver{background:#e3f2fd;color:#1565c0}
+.tag-trend{background:#e8f5e9;color:#2e7d32}
+.tag-flag{background:#fff3e0;color:#e65100}
+.tag-margin{background:#f3e5f5;color:#6a1b9a}
+.tag-structure{background:#fce4ec;color:#c62828}
+.tag-positive{background:#e8f5e9;color:#2e7d32}
+.tag-negative{background:#ffebee;color:#c62828}
+@media(max-width:900px){.grid2{grid-template-columns:1fr}.kpi-row{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Vinamilk (VNM) — Expense Variance & SG&A Deep-Dive</h1>
+  <p>FY2019–FY2025 Full P&L Sub-line Decomposition  |  Source: KPMG-audited BCTC  |  Power BI Star Schema</p>
+</div>
+
+<div class="controls">
+  <div><label>YoY Period</label><br>
+    <select id="yoySelect" onchange="render()">
+      <option value="5">FY2024→FY2025</option>
+      <option value="4">FY2023→FY2024</option>
+      <option value="3">FY2022→FY2023</option>
+      <option value="2">FY2021→FY2022</option>
+      <option value="1">FY2020→FY2021</option>
+      <option value="0">FY2019→FY2020</option>
+    </select>
+  </div>
+  <div><label>Currency</label><br>
+    <select id="currSelect" onchange="render()">
+      <option value="B">VND Billion</option>
+      <option value="T">VND Trillion</option>
+    </select>
+  </div>
+</div>
+
+<div class="tab-bar" id="tabBar"></div>
+<div class="container" id="content"></div>
+
+<script>
+const yrs=['FY2019','FY2020','FY2021','FY2022','FY2023','FY2024','FY2025'];
+const NR=[56318.1,59636.3,60976.7,59956.2,60368.9,61782.6,63645.9];
+const B=1e9,T=1e12;
+
+const cats={
+Revenue:{color:'#2F5496',items:[
+{id:'REV01',name:'Finished goods',v:[54051.2,57113.9,57932.3,56583.4,56958.5,58027.0,60035.2]},
+{id:'REV02',name:'Merchandise',v:[2121.9,2390.2,2855.1,3218.3,3257.3,3493.9,3386.3]},
+{id:'REV03',name:'Services',v:[57.4,48.2,39.7,39.6,50.2,57.6,62.1]},
+{id:'REV04',name:'Rental',v:[11.1,8.8,5.0,7.7,7.9,8.2,6.2]},
+{id:'REV05',name:'Others',v:[158.6,161.7,180.0,225.7,205.0,237.2,233.7]}
+],total:{name:'Gross Revenue',v:[56400.2,59722.9,61012.1,60074.7,60478.9,61823.9,63723.5]}},
+'Rev Deductions':{color:'#A5A5A5',items:[
+{id:'RD01',name:'Discounts',v:[35.3,48.0,57.0,68.4,21.9,17.2,29.8]},
+{id:'RD02',name:'Allowances',v:[0,0,0.5,0,0,0,0]},
+{id:'RD03',name:'Returns',v:[46.8,38.6,35.4,50.1,88.1,24.1,47.8]}
+],total:{name:'Total Deductions',v:[82.1,86.6,35.4,118.5,110.0,41.3,77.6]}},
+COGS:{color:'#ED7D31',items:[
+{id:'COGS01',name:'Finished goods sold',v:[27292.8,29083.4,30848.7,32305.7,31878.2,31984.6,33477.0]},
+{id:'COGS02',name:'Merchandise sold',v:[2066.1,2194.4,2737.7,3061.6,3157.2,3409.0,3142.1]},
+{id:'COGS03',name:'Promotional goods',v:[245.4,523.1,893.3,581.2,591.0,625.1,648.2]},
+{id:'COGS04',name:'Inv property costs',v:[4.3,2.0,1.6,1.6,0.6,3.3,1.6]},
+{id:'COGS05',name:'Services',v:[7.2,12.6,5.7,1.0,3.7,5.1,0.0]},
+{id:'COGS06',name:'Inventory allowance',v:[1.6,39.3,25.6,-22.3,19.4,14.3,26.2]},
+{id:'COGS07',name:'Other COGS',v:[128.7,113.0,128.2,130.0,174.0,151.0,141.4]}
+],total:{name:'Total COGS',v:[29745.9,31967.7,34640.9,36059.0,35824.2,36192.4,37436.4]}},
+Selling:{color:'#70AD47',items:[
+{id:'SELL01',name:'Promotion & display',v:[8796.5,9768.7,9229.1,8687.0,9005.4,9334.1,9550.9]},
+{id:'SELL02',name:'Advertising',v:[2099.8,1439.9,1233.4,1222.5,1329.0,1083.8,1051.7]},
+{id:'SELL03',name:'Staff costs',v:[662.9,627.5,660.2,742.5,777.1,891.0,955.4]},
+{id:'SELL04',name:'Outside services',v:[538.1,654.4,877.0,883.7,722.2,892.0,801.9]},
+{id:'SELL05',name:'Transportation',v:[656.6,680.8,669.3,680.1,816.8,807.0,903.7]},
+{id:'SELL06',name:'Tools & supplies',v:[101.8,94.4,124.0,132.5,148.1,131.0,125.0]},
+{id:'SELL07',name:'Claims & recalls',v:[47.0,42.0,61.3,83.7,76.0,90.4,126.7]},
+{id:'SELL08',name:'Materials',v:[58.6,76.5,53.0,52.7,54.7,69.3,65.5]},
+{id:'SELL09',name:'Depreciation',v:[32.2,63.4,43.4,63.6,88.8,59.0,60.8]}
+],total:{name:'Total Selling',v:[12993.5,13447.5,12950.7,12548.2,13018.1,13357.7,13641.7]}},
+'G&A':{color:'#7030A0',items:[
+{id:'GA01',name:'Staff costs',v:[593.3,577.9,573.8,556.4,659.7,670.5,736.6]},
+{id:'GA02',name:'Outside services',v:[319.8,352.7,347.8,348.1,377.8,365.9,411.6]},
+{id:'GA03',name:'Depreciation',v:[92.0,100.6,91.3,83.0,82.1,245.9,246.7]},
+{id:'GA04',name:'Per-diem',v:[56.8,40.0,26.9,41.2,52.9,95.0,106.6]},
+{id:'GA05',name:'Materials',v:[40.5,37.0,45.1,54.6,48.1,25.4,34.2]},
+{id:'GA06',name:'Transportation',v:[42.9,37.4,45.6,46.6,56.2,56.9,50.7]},
+{id:'GA07',name:'Loading',v:[30.1,30.6,24.7,18.1,28.1,52.1,52.9]},
+{id:'GA08',name:'Office supplies',v:[21.0,20.7,24.5,22.5,22.9,56.7,52.6]},
+{id:'GA09',name:'Taxes & fees',v:[17.5,21.2,42.6,62.2,51.5,43.4,39.1]},
+{id:'GA10',name:'Bank charges',v:[15.0,11.4,10.4,12.0,13.4,24.1,24.1]},
+{id:'GA11',name:'Provisions',v:[7.5,5.4,4.0,13.2,7.4,15.9,15.0]},
+{id:'GA12',name:'Goodwill amort.',v:[68.0,608.1,245.5,245.5,245.5,13.3,38.3]},
+{id:'GA13',name:'Others',v:[92.0,115.1,84.9,92.4,110.0,162.8,95.7]}
+],total:{name:'Total G&A',v:[1396.3,1958.2,1567.3,1595.8,1755.6,1827.9,1904.1]}},
+};
+
+const catKeys=Object.keys(cats);
+let activeTab=catKeys[0];
+const palette13=['#2F5496','#ED7D31','#70AD47','#FFC000','#5B9BD5','#C00000','#264478','#9B2335','#636363','#255E91','#43682B','#BF8F00','#7030A0'];
+let charts={};
+
+function initTabs(){
+  const bar=document.getElementById('tabBar');
+  bar.innerHTML=catKeys.map(k=>`<button onclick="switchTab('${k}')" ${k===activeTab?'class="active"':''}>${k}</button>`).join('')
+    +`<button onclick="switchTab('__summary__')">Summary</button>`;
+}
+
+function switchTab(t){activeTab=t;
+  document.querySelectorAll('.tab-bar button').forEach(b=>{
+    const label=b.textContent;
+    b.classList.toggle('active', t==='__summary__'?label==='Summary':label===t);
+  });
+  render();
+}
+
+function render(){
+  Object.values(charts).forEach(c=>c.destroy());charts={};
+  if(activeTab==='__summary__') return renderSummary();
+  renderCat(activeTab);
+}
+
+function div(){return document.getElementById('currSelect').value==='T'?1000:1}
+function unit(){return document.getElementById('currSelect').value==='T'?'T':'B'}
+function yoyIdx(){return parseInt(document.getElementById('yoySelect').value)}
+
+function fmt(v){const d=div();const x=v/d;return Math.abs(x)>=100?x.toFixed(0):x.toFixed(1)}
+
+function renderCat(key){
+  const d=cats[key], items=d.items, tot=d.total;
+  const yi=yoyIdx(), priorIdx=yi, currIdx=yi+1;
+  const priorY=yrs[priorIdx], currY=yrs[currIdx];
+  const ct=document.getElementById('content');
+
+  const fy25=tot.v[currIdx], fy24=tot.v[priorIdx], varAbs=fy25-fy24;
+  const varPct=fy24!==0?(varAbs/Math.abs(fy24)*100):0;
+  const pctRev=(fy25/NR[currIdx]*100).toFixed(1);
+  const isExp=['COGS','Selling','G&A','Rev Deductions'].includes(key);
+  const favVar=isExp?(varAbs<0):(varAbs>0);
+
+  let topM={name:'',v:0};
+  items.forEach(it=>{const v=it.v[currIdx]-it.v[priorIdx];if(Math.abs(v)>Math.abs(topM.v))topM={name:it.name,v:v}});
+  const topFav=isExp?(topM.v<0):(topM.v>0);
+
+  ct.innerHTML=`
+    <div class="kpi-row">
+      <div class="kpi"><div class="label">${currY} ${key}</div><div class="value">${fmt(fy25)}${unit()}</div><div class="sub">${pctRev}% of Net Revenue</div></div>
+      <div class="kpi"><div class="label">YoY Variance</div><div class="value ${favVar?'pos':'neg'}">${varAbs>0?'+':''}${fmt(varAbs)}${unit()}</div><div class="sub">${varPct>0?'+':''}${varPct.toFixed(1)}% vs ${priorY}</div></div>
+      <div class="kpi"><div class="label">Top Mover</div><div class="value" style="font-size:14px">${topM.name}</div><div class="sub ${topFav?'pos':'neg'}">${topM.v>0?'+':''}${fmt(topM.v)}${unit()}</div></div>
+      <div class="kpi"><div class="label">Sub-lines</div><div class="value">${items.length}</div><div class="sub">FY19–FY25 tracked</div></div>
+    </div>
+    <div class="grid2">
+      <div class="card"><h3>7-Year Trend (VND ${unit()})</h3><canvas id="c1"></canvas></div>
+      <div class="card"><h3>${currY} Composition</h3><canvas id="c2"></canvas></div>
+    </div>
+    <div class="grid2">
+      <div class="card"><h3>YoY Variance ${priorY}→${currY} (VND ${unit()})</h3><canvas id="c3"></canvas></div>
+      <div class="card"><h3>% of Net Revenue Trend (Top 5)</h3><canvas id="c4"></canvas></div>
+    </div>
+    <div class="grid1">${renderCommentaryHTML(genCatCommentary(key,priorIdx,currIdx),'FP&A Commentary — '+key+' ('+priorY+'→'+currY+')')}</div>
+    <div class="grid1"><div class="card"><h3>Detail Table</h3><div class="scroll-table">${buildTable(items,tot,isExp,priorIdx,currIdx)}</div></div></div>
+  `;
+
+  const pal=palette13.slice(0,items.length);
+  const dv=div();
+
+  charts.c1=new Chart(document.getElementById('c1'),{type:'bar',
+    data:{labels:yrs,datasets:items.map((it,i)=>({label:it.name,data:it.v.map(v=>v/dv),backgroundColor:pal[i],borderRadius:2}))},
+    options:{responsive:true,plugins:{legend:{position:'bottom',labels:{font:{size:9}}}},scales:{x:{stacked:true},y:{stacked:true,title:{display:true,text:'VND '+unit()}}}}});
+
+  charts.c2=new Chart(document.getElementById('c2'),{type:'doughnut',
+    data:{labels:items.map(i=>i.name),datasets:[{data:items.map(i=>Math.abs(i.v[currIdx])),backgroundColor:pal}]},
+    options:{responsive:true,plugins:{legend:{position:'right',labels:{font:{size:9}}}}}});
+
+  const vd=items.map(i=>({name:i.name,v:i.v[currIdx]-i.v[priorIdx]})).sort((a,b)=>b.v-a.v);
+  charts.c3=new Chart(document.getElementById('c3'),{type:'bar',
+    data:{labels:vd.map(v=>v.name),datasets:[{data:vd.map(v=>v.v/dv),backgroundColor:vd.map(v=>isExp?(v.v<0?'#4caf50':'#ef5350'):(v.v>0?'#4caf50':'#ef5350'))}]},
+    options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{title:{display:true,text:'VND '+unit()}}}}});
+
+  const top5=items.slice().sort((a,b)=>Math.abs(b.v[currIdx])-Math.abs(a.v[currIdx])).slice(0,5);
+  charts.c4=new Chart(document.getElementById('c4'),{type:'line',
+    data:{labels:yrs,datasets:top5.map((it,i)=>({label:it.name,data:it.v.map((v,j)=>v/NR[j]*100),borderColor:pal[items.indexOf(it)],backgroundColor:'transparent',tension:.3,pointRadius:3}))},
+    options:{responsive:true,plugins:{legend:{position:'bottom',labels:{font:{size:9}}}},scales:{y:{title:{display:true,text:'%'}}}}});
+}
+
+function buildTable(items,tot,isExp,pi,ci){
+  let h='<table><tr><th>Line Item</th>';
+  yrs.forEach(y=>h+=`<th class="right">${y}</th>`);
+  h+=`<th class="right">Var</th><th class="right">Var%</th><th class="right">% Rev</th></tr>`;
+  const dv=div();
+  items.forEach(it=>{
+    const v=it.v[ci]-it.v[pi], vp=it.v[pi]!==0?(v/Math.abs(it.v[pi])*100):0;
+    const fav=isExp?(v<0):(v>0);
+    h+=`<tr><td>${it.name}</td>`;
+    it.v.forEach(val=>h+=`<td class="right">${(val/dv).toFixed(1)}</td>`);
+    h+=`<td class="right" style="color:${fav?'#2e7d32':'#c62828'}">${v>0?'+':''}${(v/dv).toFixed(1)}</td>`;
+    h+=`<td class="right">${vp>0?'+':''}${vp.toFixed(1)}%</td>`;
+    h+=`<td class="right">${(it.v[ci]/NR[ci]*100).toFixed(2)}%</td></tr>`;
+  });
+  const tv=tot.v[ci]-tot.v[pi], tvp=tot.v[pi]!==0?(tv/Math.abs(tot.v[pi])*100):0;
+  h+=`<tr class="tfoot"><td>${tot.name}</td>`;
+  tot.v.forEach(v=>h+=`<td class="right">${(v/dv).toFixed(1)}</td>`);
+  h+=`<td class="right">${tv>0?'+':''}${(tv/dv).toFixed(1)}</td><td class="right">${tvp>0?'+':''}${tvp.toFixed(1)}%</td>`;
+  h+=`<td class="right">${(tot.v[ci]/NR[ci]*100).toFixed(2)}%</td></tr></table>`;
+  return h;
+}
+
+function renderSummary(){
+  const ct=document.getElementById('content');
+  const yi=yoyIdx(), pi=yi, ci=yi+1;
+  const priorY=yrs[pi], currY=yrs[ci];
+  const dv=div();
+
+  const expCats=['COGS','Selling','G&A'];
+  const totExp=y=>expCats.reduce((s,k)=>s+cats[k].total.v[y],0);
+  const te25=totExp(ci), te24=totExp(pi), teVar=te25-te24;
+
+  // All items across all cats
+  let all=[];
+  catKeys.forEach(k=>{
+    const isExp=['COGS','Selling','G&A','Rev Deductions'].includes(k);
+    cats[k].items.forEach(it=>{
+      const v=it.v[ci]-it.v[pi];
+      all.push({name:it.name,cat:k,v24:it.v[pi],v25:it.v[ci],var:v,varPct:it.v[pi]!==0?(v/Math.abs(it.v[pi])*100):0,isExp});
+    });
+  });
+  all.sort((a,b)=>Math.abs(b.var)-Math.abs(a.var));
+  const top15=all.slice(0,15);
+
+  ct.innerHTML=`
+    <div class="kpi-row">
+      <div class="kpi"><div class="label">${currY} COGS+SG&A</div><div class="value">${fmt(te25)}${unit()}</div><div class="sub">${(te25/NR[ci]*100).toFixed(1)}% of Revenue</div></div>
+      <div class="kpi"><div class="label">YoY Opex Growth</div><div class="value neg">+${fmt(teVar)}${unit()}</div><div class="sub">+${(teVar/te24*100).toFixed(1)}% vs ${priorY}</div></div>
+      <div class="kpi"><div class="label">COGS % of Rev</div><div class="value">${(cats.COGS.total.v[ci]/NR[ci]*100).toFixed(1)}%</div><div class="sub">${priorY}: ${(cats.COGS.total.v[pi]/NR[pi]*100).toFixed(1)}%</div></div>
+      <div class="kpi"><div class="label">SG&A % of Rev</div><div class="value">${((cats.Selling.total.v[ci]+cats['G&A'].total.v[ci])/NR[ci]*100).toFixed(1)}%</div><div class="sub">${priorY}: ${((cats.Selling.total.v[pi]+cats['G&A'].total.v[pi])/NR[pi]*100).toFixed(1)}%</div></div>
+      <div class="kpi"><div class="label">Categories</div><div class="value">5</div><div class="sub">${catKeys.reduce((s,k)=>s+cats[k].items.length,0)} sub-lines tracked</div></div>
+    </div>
+    <div class="grid2">
+      <div class="card"><h3>Expense Structure (% of Revenue)</h3><canvas id="s1"></canvas></div>
+      <div class="card"><h3>Top 15 Movers ${priorY}→${currY}</h3><canvas id="s2"></canvas></div>
+    </div>
+    <div class="grid2">
+      <div class="card"><h3>Category Totals Trend</h3><canvas id="s3"></canvas></div>
+      <div class="card"><h3>% of Revenue by Category</h3><canvas id="s4"></canvas></div>
+    </div>
+    <div class="grid1">${renderCommentaryHTML(genSummaryCommentary(pi,ci),'FP&A Executive Commentary — '+priorY+'→'+currY)}</div>
+    <div class="grid1"><div class="card"><h3>Top 15 Variance Detail (${priorY}→${currY})</h3><div class="scroll-table"><table>
+      <tr><th>#</th><th>Item</th><th>Category</th><th class="right">${priorY}</th><th class="right">${currY}</th><th class="right">Var</th><th class="right">Var%</th></tr>
+      ${top15.map((it,i)=>{const fav=it.isExp?(it.var<0):(it.var>0);
+        return `<tr><td>${i+1}</td><td>${it.name}</td><td>${it.cat}</td><td class="right">${(it.v24/dv).toFixed(1)}</td><td class="right">${(it.v25/dv).toFixed(1)}</td><td class="right" style="color:${fav?'#2e7d32':'#c62828'}">${it.var>0?'+':''}${(it.var/dv).toFixed(1)}</td><td class="right">${it.varPct>0?'+':''}${it.varPct.toFixed(1)}%</td></tr>`}).join('')}
+    </table></div></div></div>
+  `;
+
+  charts.s1=new Chart(document.getElementById('s1'),{type:'bar',
+    data:{labels:yrs,datasets:expCats.map(k=>({label:k,data:cats[k].total.v.map((v,i)=>v/NR[i]*100),backgroundColor:cats[k].color}))},
+    options:{responsive:true,plugins:{legend:{position:'bottom'}},scales:{x:{stacked:true},y:{stacked:true,max:100,title:{display:true,text:'%'}}}}});
+
+  charts.s2=new Chart(document.getElementById('s2'),{type:'bar',
+    data:{labels:top15.map(i=>i.name),datasets:[{data:top15.map(i=>i.var/dv),backgroundColor:top15.map(i=>{const fav=i.isExp?(i.var<0):(i.var>0);return fav?'#4caf50':'#ef5350'})}]},
+    options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{title:{display:true,text:'VND '+unit()}}}}});
+
+  const mainCats=['COGS','Selling','G&A'];
+  charts.s3=new Chart(document.getElementById('s3'),{type:'line',
+    data:{labels:yrs,datasets:mainCats.map(k=>({label:k,data:cats[k].total.v.map(v=>v/dv),borderColor:cats[k].color,backgroundColor:'transparent',tension:.3,pointRadius:3}))},
+    options:{responsive:true,plugins:{legend:{position:'bottom'}},scales:{y:{title:{display:true,text:'VND '+unit()}}}}});
+
+  charts.s4=new Chart(document.getElementById('s4'),{type:'line',
+    data:{labels:yrs,datasets:mainCats.map(k=>({label:k,data:cats[k].total.v.map((v,i)=>v/NR[i]*100),borderColor:cats[k].color,backgroundColor:'transparent',tension:.3,pointRadius:4}))},
+    options:{responsive:true,plugins:{legend:{position:'bottom'}},scales:{y:{title:{display:true,text:'% of Net Revenue'}}}}});
+}
+
+// ═══════════════════════════════════════════════════════════════
+// COMMENTARY ENGINE
+// ═══════════════════════════════════════════════════════════════
+function cagr(start,end,n){if(start<=0||end<=0||n<=0)return 0;return(Math.pow(end/start,1/n)-1)*100}
+function genCatCommentary(key,pi,ci){
+  const d=cats[key],items=d.items,tot=d.total;
+  const priorY=yrs[pi],currY=yrs[ci];
+  const isExp=['COGS','Selling','G&A','Rev Deductions'].includes(key);
+  const totVar=tot.v[ci]-tot.v[pi];
+  const totVarPct=tot.v[pi]!==0?(totVar/Math.abs(tot.v[pi])*100):0;
+  const pctRevPrior=(tot.v[pi]/NR[pi]*100);
+  const pctRevCurr=(tot.v[ci]/NR[ci]*100);
+  const marginShift=pctRevCurr-pctRevPrior;
+  const insights=[];
+
+  // 1. Overall variance driver
+  const sorted=items.map(it=>({name:it.name,v:it.v[ci]-it.v[pi],pct:it.v[pi]!==0?((it.v[ci]-it.v[pi])/Math.abs(it.v[pi])*100):0,curr:it.v[ci],prior:it.v[pi]})).sort((a,b)=>Math.abs(b.v)-Math.abs(a.v));
+  const top3=sorted.slice(0,3);
+  const topDriverStr=top3.map(t=>`<strong>${t.name}</strong> (${t.v>0?'+':''}${(t.v).toFixed(1)}B, ${t.pct>0?'+':''}${t.pct.toFixed(1)}%)`).join(', ');
+  insights.push({tag:'DRIVER',cls:'tag-driver',text:`${currY} total ${key} ${isExp?'increased':'changed'} by <strong>${totVar>0?'+':''}${totVar.toFixed(1)}B VND</strong> (${totVarPct>0?'+':''}${totVarPct.toFixed(1)}%). Top 3 drivers: ${topDriverStr}.`});
+
+  // 2. Margin / % of revenue shift
+  const dir=marginShift>0?'expanded':'contracted';
+  const marginGood=isExp?(marginShift<0):(marginShift>0);
+  insights.push({tag:'MARGIN',cls:'tag-margin',text:`As % of Net Revenue: ${pctRevPrior.toFixed(2)}% → ${pctRevCurr.toFixed(2)}% (${marginShift>0?'+':''}${marginShift.toFixed(2)}pp ${dir}). ${marginGood?'Favorable — operating leverage improving.':'Unfavorable — cost absorption outpacing revenue growth.'}`});
+
+  // 3. 7-year CAGR trend
+  const cagrVal=cagr(Math.abs(tot.v[0]),Math.abs(tot.v[6]),6);
+  const nrCagr=cagr(NR[0],NR[6],6);
+  const outpacing=cagrVal>nrCagr;
+  insights.push({tag:'TREND',cls:'tag-trend',text:`7-year CAGR (FY19→FY25): <strong>${cagrVal.toFixed(1)}%</strong> vs Net Revenue CAGR of ${nrCagr.toFixed(1)}%. ${key} is ${outpacing?(isExp?'growing faster than revenue — structural cost pressure.':'outpacing revenue — positive mix shift.'):(isExp?'growing slower than revenue — positive operating leverage.':'lagging revenue growth.')}` });
+
+  // 4. Concentration analysis
+  const totalAbs=items.reduce((s,it)=>s+Math.abs(it.v[ci]),0);
+  const top1share=totalAbs>0?(Math.abs(sorted[0].curr)/totalAbs*100):0;
+  if(top1share>40){
+    insights.push({tag:'STRUCTURE',cls:'tag-structure',text:`High concentration: <strong>${sorted[0].name}</strong> accounts for ${top1share.toFixed(1)}% of total ${key}. Any shift in this line has outsized P&L impact.`});
+  }
+
+  // 5. Red flags — volatile lines (>30% YoY swing)
+  const volatile=sorted.filter(t=>Math.abs(t.pct)>30 && Math.abs(t.v)>5);
+  if(volatile.length>0){
+    const flagStr=volatile.map(t=>`<strong>${t.name}</strong> (${t.pct>0?'+':''}${t.pct.toFixed(0)}%)`).join(', ');
+    insights.push({tag:'FLAG',cls:'tag-flag',text:`High-volatility lines (>30% YoY): ${flagStr}. These warrant management explanation in earnings calls or BCTC notes.`});
+  }
+
+  // 6. Multi-year direction consistency
+  const consistentUp=items.filter(it=>{let up=0;for(let j=1;j<7;j++){if(it.v[j]>it.v[j-1])up++}return up>=5});
+  const consistentDown=items.filter(it=>{let dn=0;for(let j=1;j<7;j++){if(it.v[j]<it.v[j-1])dn++}return dn>=5});
+  if(consistentUp.length>0){
+    insights.push({tag:isExp?'NEGATIVE':'POSITIVE',cls:isExp?'tag-negative':'tag-positive',text:`Persistently rising (5+ of 6 years): ${consistentUp.map(it=>'<strong>'+it.name+'</strong>').join(', ')}. ${isExp?'Structural cost creep — investigate root cause.':'Sustained growth drivers.'}`});
+  }
+  if(consistentDown.length>0){
+    insights.push({tag:isExp?'POSITIVE':'NEGATIVE',cls:isExp?'tag-positive':'tag-negative',text:`Persistently declining (5+ of 6 years): ${consistentDown.map(it=>'<strong>'+it.name+'</strong>').join(', ')}. ${isExp?'Positive cost discipline or structural shift.':'Erosion trend — assess sustainability.'}`});
+  }
+
+  return insights;
+}
+
+function genSummaryCommentary(pi,ci){
+  const priorY=yrs[pi],currY=yrs[ci];
+  const insights=[];
+  const dv=1; // always in B for commentary
+
+  // Total operating expenses
+  const expCats=['COGS','Selling','G&A'];
+  const te_c=expCats.reduce((s,k)=>s+cats[k].total.v[ci],0);
+  const te_p=expCats.reduce((s,k)=>s+cats[k].total.v[pi],0);
+  const teVar=te_c-te_p;
+  const revVar=NR[ci]-NR[pi];
+  const opLev=revVar!==0?(teVar/revVar):0;
+
+  insights.push({tag:'DRIVER',cls:'tag-driver',text:`Total operating expenses (COGS+SG&A) increased <strong>${teVar>0?'+':''}${teVar.toFixed(1)}B VND</strong> while Net Revenue grew <strong>${revVar>0?'+':''}${revVar.toFixed(1)}B VND</strong>. Operating leverage ratio: <strong>${opLev.toFixed(2)}x</strong> — ${opLev>1?'expenses growing faster than revenue (negative leverage).':'revenue growth exceeds cost growth (positive leverage).'}`});
+
+  // Gross margin trend
+  const gm_c=(1-cats.COGS.total.v[ci]/NR[ci])*100;
+  const gm_p=(1-cats.COGS.total.v[pi]/NR[pi])*100;
+  insights.push({tag:'MARGIN',cls:'tag-margin',text:`Gross margin: ${gm_p.toFixed(1)}% → ${gm_c.toFixed(1)}% (${(gm_c-gm_p)>0?'+':''}${(gm_c-gm_p).toFixed(1)}pp). ${gm_c>gm_p?'Input cost management improving.':'Input cost pressure squeezing margins — monitor raw material pricing.'}`});
+
+  // SG&A efficiency
+  const sga_c=(cats.Selling.total.v[ci]+cats['G&A'].total.v[ci])/NR[ci]*100;
+  const sga_p=(cats.Selling.total.v[pi]+cats['G&A'].total.v[pi])/NR[pi]*100;
+  insights.push({tag:'TREND',cls:'tag-trend',text:`SG&A ratio: ${sga_p.toFixed(1)}% → ${sga_c.toFixed(1)}% (${(sga_c-sga_p)>0?'+':''}${(sga_c-sga_p).toFixed(2)}pp). ${sga_c<sga_p?'Operating efficiency improving — selling & admin costs growing slower than revenue.':'SG&A expanding as % of revenue — may indicate investment phase or cost creep.'}`});
+
+  // COGS breakdown insight
+  const cogsRatio_c=cats.COGS.total.v[ci]/NR[ci]*100;
+  const cogsRatio_p=cats.COGS.total.v[pi]/NR[pi]*100;
+  const cogsTopItem=cats.COGS.items.slice().sort((a,b)=>Math.abs(b.v[ci]-b.v[pi])-(Math.abs(a.v[ci]-a.v[pi])))[0];
+  const cogsTopVar=cogsTopItem.v[ci]-cogsTopItem.v[pi];
+  insights.push({tag:'STRUCTURE',cls:'tag-structure',text:`COGS ratio: ${cogsRatio_p.toFixed(1)}% → ${cogsRatio_c.toFixed(1)}% of revenue. Largest COGS driver: <strong>${cogsTopItem.name}</strong> (${cogsTopVar>0?'+':''}${cogsTopVar.toFixed(1)}B). ${cogsRatio_c>cogsRatio_p?'Raw material / input costs rising faster than pricing power.':'Cost efficiency or favorable input pricing.'}`});
+
+  // Biggest overall movers
+  let all=[];
+  Object.keys(cats).forEach(k=>{
+    const isExp=['COGS','Selling','G&A','Rev Deductions'].includes(k);
+    cats[k].items.forEach(it=>{
+      const v=it.v[ci]-it.v[pi];
+      all.push({name:it.name,cat:k,var:v,isExp});
+    });
+  });
+  all.sort((a,b)=>Math.abs(b.var)-Math.abs(a.var));
+  const topFav=all.filter(it=>(it.isExp&&it.var<0)||(!it.isExp&&it.var>0)).slice(0,3);
+  const topUnfav=all.filter(it=>(it.isExp&&it.var>0)||(!it.isExp&&it.var<0)).slice(0,3);
+
+  if(topFav.length){
+    insights.push({tag:'POSITIVE',cls:'tag-positive',text:`Top favorable movers: ${topFav.map(t=>`<strong>${t.name}</strong> (${t.cat}, ${t.var>0?'+':''}${t.var.toFixed(1)}B)`).join('; ')}.`});
+  }
+  if(topUnfav.length){
+    insights.push({tag:'NEGATIVE',cls:'tag-negative',text:`Top unfavorable movers: ${topUnfav.map(t=>`<strong>${t.name}</strong> (${t.cat}, ${t.var>0?'+':''}${t.var.toFixed(1)}B)`).join('; ')}.`});
+  }
+
+  // Selling efficiency — promo vs staff cost mix
+  const promoShare_c=cats.Selling.items[0].v[ci]/cats.Selling.total.v[ci]*100;
+  const promoShare_p=cats.Selling.items[0].v[pi]/cats.Selling.total.v[pi]*100;
+  const staffSellShare_c=cats.Selling.items[2].v[ci]/cats.Selling.total.v[ci]*100;
+  insights.push({tag:'FLAG',cls:'tag-flag',text:`Selling mix: Promotion/display = ${promoShare_c.toFixed(1)}% of total selling (${priorY}: ${promoShare_p.toFixed(1)}%), Staff costs = ${staffSellShare_c.toFixed(1)}%. ${promoShare_c>70?'Heavy reliance on trade promotion — monitor ROI and channel dependency.':'Balanced selling cost structure.'}`});
+
+  return insights;
+}
+
+function renderCommentaryHTML(insights,title){
+  if(!insights.length) return '';
+  return `<div class="commentary"><h3>${title}</h3>${insights.map(i=>`<div class="insight"><span class="tag ${i.cls}">${i.tag}</span>${i.text}</div>`).join('')}</div>`;
+}
+
+initTabs();
+render();
+</script>
+</body>
+</html>
