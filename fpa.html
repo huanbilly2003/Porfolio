@@ -509,18 +509,16 @@
 
     <div class="project-tabs">
       <button class="tab-btn active" data-filter="all">All Projects</button>
-      <button class="tab-btn" data-filter="budget"><i class="fas fa-calculator"></i> Budgeting</button>
-      <button class="tab-btn" data-filter="model"><i class="fas fa-chart-line"></i> Modeling</button>
-      <button class="tab-btn" data-filter="report"><i class="fas fa-file-alt"></i> Reporting</button>
-      <button class="tab-btn" data-filter="dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</button>
+      <button class="tab-btn" data-filter="forecast"><i class="fas fa-chart-line"></i> Forecasting</button>
+      <button class="tab-btn" data-filter="variance"><i class="fas fa-search-dollar"></i> Variance Analysis</button>
     </div>
 
     <div class="projects-grid" id="projectsGrid">
 
-      <div class="project-card" data-category="dashboard">
+      <div class="project-card" data-category="variance">
         <div class="project-banner dashboard"><i class="fas fa-search-dollar"></i></div>
         <div class="project-body">
-          <div class="project-cat">Variance Dashboard</div>
+          <div class="project-cat">Variance Analysis</div>
           <h3>VNM Expense Variance &amp; SG&A Deep-Dive</h3>
           <p>Interactive dashboard analyzing Vinamilk's (VNM) full P&L sub-line decomposition from FY2019&ndash;FY2025. Features YoY variance analysis, SG&A cost structure breakdown, waterfall charts, and AI-generated commentary. Built from KPMG-audited financial statements using Power BI star schema methodology.</p>
           <div class="project-tools">
@@ -530,6 +528,22 @@
             <span class="tool-tag">P&L</span>
           </div>
           <a href="VNM_SGA_DeepDive.html" target="_blank" class="project-link"><i class="fas fa-external-link-alt"></i> Live Dashboard</a>
+        </div>
+      </div>
+
+      <div class="project-card" data-category="forecast">
+        <div class="project-banner forecast"><i class="fas fa-chart-line"></i></div>
+        <div class="project-body">
+          <div class="project-cat">Driver-Based Forecasting</div>
+          <h3>VNM Driver-Based Revenue &amp; Expense Forecasting</h3>
+          <p>Interactive forecasting dashboard for Vinamilk (VNM) using driver-based methodology. Projects revenue by product segment with volume &times; price drivers, models COGS and operating expenses with historical trend extrapolation, and generates forward-looking P&amp;L scenarios. Built from KPMG-audited financial statements.</p>
+          <div class="project-tools">
+            <span class="tool-tag">Forecasting</span>
+            <span class="tool-tag">Chart.js</span>
+            <span class="tool-tag">Driver-Based</span>
+            <span class="tool-tag">Revenue</span>
+          </div>
+          <a href="VNM_Driver_Based_Forecasting.html" target="_blank" class="project-link"><i class="fas fa-external-link-alt"></i> Live Dashboard</a>
         </div>
       </div>
 

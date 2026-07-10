@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VNM Driver-Based Forecasting Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg: #f0f2f5; --card: #fff; --primary: #2F5496; --green: #70AD47;
+  --red: #E74C3C; --orange: #ED7D31; --blue-light: #DAEEF3;
+  --green-light: #E2EFDA; --red-light: #FDE9D9; --gray: #808080;
+  --text: #1a1a2e; --text-light: #555; --border: #e0e0e0;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); color: var(--text); }
+.header { background: linear-gradient(135deg, var(--primary), #1a3a6e); color: #fff; padding: 24px 32px; }
+.header h1 { font-size: 22px; font-weight: 600; }
+.header p { font-size: 13px; opacity: 0.8; margin-top: 4px; }
+.controls { display: flex; gap: 12px; align-items: center; padding: 16px 32px; background: #fff; border-bottom: 1px solid var(--border); }
+.controls label { font-size: 13px; color: var(--text-light); font-weight: 500; }
+.controls select { padding: 6px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; }
+.dashboard { padding: 20px 32px; display: flex; flex-direction: column; gap: 20px; max-width: 1400px; margin: 0 auto; }
+.kpi-row { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; }
+.kpi { background: var(--card); border-radius: 10px; padding: 18px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); border-left: 4px solid var(--primary); }
+.kpi .label { font-size: 11px; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.5px; }
+.kpi .value { font-size: 26px; font-weight: 700; margin: 6px 0 4px; color: var(--primary); }
+.kpi .sub { font-size: 12px; color: var(--text-light); }
+.kpi.green { border-left-color: var(--green); }
+.kpi.green .value { color: var(--green); }
+.kpi.orange { border-left-color: var(--orange); }
+.kpi.orange .value { color: var(--orange); }
+.kpi.red { border-left-color: var(--red); }
+.row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.row.full { grid-template-columns: 1fr; }
+.card { background: var(--card); border-radius: 10px; padding: 22px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+.card h3 { font-size: 14px; color: var(--primary); margin-bottom: 14px; font-weight: 600; }
+.card h3 span { font-weight: 400; color: var(--text-light); font-size: 12px; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { background: var(--primary); color: #fff; padding: 10px 12px; text-align: left; font-weight: 500; }
+td { padding: 9px 12px; border-bottom: 1px solid #f0f0f0; }
+tr:hover td { background: #f8f9fb; }
+.pos { color: var(--green); font-weight: 600; }
+.neg { color: var(--red); font-weight: 600; }
+.bridge-bar { display: flex; align-items: center; gap: 10px; margin: 6px 0; }
+.bridge-bar .bar-label { width: 140px; font-size: 13px; text-align: right; }
+.bridge-bar .bar-container { flex: 1; height: 28px; position: relative; }
+.bridge-bar .bar { height: 100%; border-radius: 4px; display: flex; align-items: center; padding: 0 8px; font-size: 12px; font-weight: 600; color: #fff; min-width: 60px; }
+.bridge-bar .bar.positive { background: var(--green); }
+.bridge-bar .bar.negative { background: var(--red); }
+.bridge-bar .bar.neutral { background: var(--primary); }
+.commentary { background: #f8f9fb; border-radius: 8px; padding: 16px; margin-top: 12px; }
+.commentary h4 { font-size: 13px; color: var(--primary); margin-bottom: 6px; }
+.commentary p { font-size: 13px; color: var(--text-light); line-height: 1.6; }
+.tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+.tag.base { background: var(--green-light); color: #2d6a2e; }
+.tag.upside { background: var(--blue-light); color: #1a6e8e; }
+.tag.downside { background: var(--red-light); color: #8e1a1a; }
+.chart-container { position: relative; height: 280px; }
+.footer { text-align: center; padding: 16px; font-size: 11px; color: var(--gray); }
+@media (max-width: 900px) {
+  .kpi-row { grid-template-columns: repeat(3, 1fr); }
+  .row { grid-template-columns: 1fr; }
+  .controls { flex-wrap: wrap; }
+}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>Vinamilk (VNM) — Driver-Based Forecasting</h1>
+  <p>Scenario planning pack: FY2019–FY2025 actuals + FY2026E–FY2030E forecast  |  Auto-calibrated at 0.7σ historical volatility</p>
+</div>
+
+<div class="controls">
+  <label>Scenario</label>
+  <select id="scenarioSelect" onchange="updateDashboard()">
+    <option value="base" selected>Base Case</option>
+    <option value="upside">Upside</option>
+    <option value="downside">Downside</option>
+  </select>
+  <label>Year</label>
+  <select id="yearSelect" onchange="updateDashboard()">
+    <option value="0" selected>FY2026E</option>
+    <option value="1">FY2027E</option>
+    <option value="2">FY2028E</option>
+    <option value="3">FY2029E</option>
+    <option value="4">FY2030E</option>
+  </select>
+  <label>Currency</label>
+  <select id="unitSelect" onchange="updateDashboard()">
+    <option value="T" selected>Trillion VND</option>
+    <option value="B">Billion VND</option>
+  </select>
+</div>
+
+<div class="dashboard">
+  <div class="kpi-row">
+    <div class="kpi" id="kpi-rev"><div class="label">Revenue</div><div class="value" id="kv-rev">—</div><div class="sub" id="ks-rev"></div></div>
+    <div class="kpi green" id="kpi-ebitda"><div class="label">EBITDA</div><div class="value" id="kv-ebitda">—</div><div class="sub" id="ks-ebitda"></div></div>
+    <div class="kpi" id="kpi-gm"><div class="label">Gross Margin</div><div class="value" id="kv-gm">—</div><div class="sub" id="ks-gm"></div></div>
+    <div class="kpi green" id="kpi-em"><div class="label">EBITDA Margin</div><div class="value" id="kv-em">—</div><div class="sub" id="ks-em"></div></div>
+    <div class="kpi orange" id="kpi-cash"><div class="label">Ending Cash</div><div class="value" id="kv-cash">—</div><div class="sub" id="ks-cash"></div></div>
+    <div class="kpi" id="kpi-mape"><div class="label">Forecast MAPE</div><div class="value" id="kv-mape">—</div><div class="sub" id="ks-mape">Historical accuracy</div></div>
+  </div>
+
+  <div class="row">
+    <div class="card">
+      <h3>Revenue Forecast by Scenario <span>FY2019–FY2030E</span></h3>
+      <div class="chart-container"><canvas id="revChart"></canvas></div>
+    </div>
+    <div class="card">
+      <h3>EBITDA Forecast by Scenario <span>FY2019–FY2030E</span></h3>
+      <div class="chart-container"><canvas id="ebitdaChart"></canvas></div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="card">
+      <h3>Forecast Variance by Driver <span>Impact on EBITDA vs Base</span></h3>
+      <div id="bridgeBars"></div>
+    </div>
+    <div class="card">
+      <h3>Base → Downside EBITDA Bridge <span>FY2026E</span></h3>
+      <div id="ebitdaBridge"></div>
+    </div>
+  </div>
+
+  <div class="row full">
+    <div class="card">
+      <h3>Forecast Signoff Table</h3>
+      <table>
+        <thead><tr><th>Metric</th><th>FY2025 Actual</th><th>Base</th><th>Upside</th><th>Downside</th><th>Risk / Opportunity</th></tr></thead>
+        <tbody id="signoffBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="card">
+      <h3>Assumption Owners</h3>
+      <table>
+        <thead><tr><th>Driver</th><th>Owner</th><th>Key Sensitivity</th></tr></thead>
+        <tbody>
+          <tr><td>Revenue Growth</td><td>CFO / Sales VP</td><td>Volume recovery + pricing power</td></tr>
+          <tr><td>COGS %</td><td>COO / Procurement</td><td>Raw milk prices, FX on imports</td></tr>
+          <tr><td>Selling %</td><td>CMO / Sales VP</td><td>Marketing efficiency, channel mix</td></tr>
+          <tr><td>G&A %</td><td>CFO / HR</td><td>Headcount, IT investment</td></tr>
+          <tr><td>D&A %</td><td>CFO / Operations</td><td>Capex maturity, asset lifecycle</td></tr>
+          <tr><td>Cash Guardrail</td><td>CFO / Treasury</td><td>Min cash > 3 months OpEx</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card">
+      <h3>Forecast Accuracy (MAPE) <span>Simulated: FY2024 basis → FY2025 actual</span></h3>
+      <table>
+        <thead><tr><th>Metric</th><th>Forecast</th><th>Actual</th><th>APE</th></tr></thead>
+        <tbody id="mapeBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="row full">
+    <div class="card">
+      <div class="commentary">
+        <h4>What happened?</h4>
+        <p>VNM FY2025 delivered 3.0% revenue growth to VND 63.6T, confirming demand normalization after the flat FY2021–2023 period. EBITDA was VND 12.8T (20.1% margin), held back by input cost inflation (COGS +3.4% YoY).</p>
+        <h4 style="margin-top:12px">Why?</h4>
+        <p>Scenario spread is driven by COGS volatility (±2.0pp, the widest driver) and revenue growth uncertainty (±1.7pp). Selling and G&A have low historical variance, making them less impactful swing factors.</p>
+        <h4 style="margin-top:12px">What next?</h4>
+        <p>Lock owner assumptions for FY2026E, stress-test COGS sensitivity against global dairy price forecasts, and validate revenue growth assumptions against Q1-2026 run-rate before CFO signoff.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  Static HTML version — Vinamilk FP&A Portfolio Project  |  Data: KPMG-audited BCTC FY2019–FY2025  |  Scenarios auto-calibrated at 0.7σ
+</div>
+
+<script>
+const T = 1e12, B = 1e9;
+const years = ['FY2019','FY2020','FY2021','FY2022','FY2023','FY2024','FY2025','FY2026E','FY2027E','FY2028E','FY2029E','FY2030E'];
+const yrsF = ['FY2026E','FY2027E','FY2028E','FY2029E','FY2030E'];
+
+// Actuals
+const revH = [56318122762744,59636286225547,60919164846146,59956247197418,60368915511505,61782609528445,63645886756227];
+const ebitdaH = [14130532456354,14471841931010,13881656397698,11848623437435,11825606239806,12499712332272,12779960497496];
+const gmH = [47.2,46.4,43.1,39.9,40.7,41.4,41.2];
+const emH = [25.1,24.3,22.8,19.8,19.6,20.2,20.1];
+
+// Forecast scenarios (pre-computed)
+const D = {
+  base: {
+    rev: [66828181094038.35,69855453953310.08,73038899461710.04,75960455440178.44,78998873657785.58],
+    ebitda: [14100746210842.1,14862535098499.86,15767696076131.28,16517143455786.06,17420574116506.02],
+    gp: [28067837259496.12,29478904847945.65,31141541221728.78,32485156403036.27,33989514672477.8],
+    cogs: [38760343834542.24,40376549105364.43,41897358239981.27,43475299037142.17,45009358985307.78],
+    sell: [14234462572930.17,14805355838301.54,15338168887159.11,15799775332197.12,16273768333503.43],
+    ga: [2004845432821.15,2025698064645.99,2118128064429.59,2126892752324.6,2211968542617.99],
+    da: [2272216957097.3,2375685033612.54,2410258467876.63,2506683738040.89,2527548219949.14],
+    npat: [10554608265918.99,11136103073866.89,11815009457038.32,12382424485937.67,13058330217295.27],
+    gm_pct: [42.0,42.2,42.6,42.8,43.0],
+    em_pct: [21.1,21.3,21.6,21.7,22.0],
+    nm_pct: [15.8,15.9,16.2,16.3,16.5],
+    cash: [4954068350284.73,7816894498017.15,10832472098485.07,14093108702464.56,17121777062209.98],
+  },
+  upside: {
+    rev: [67935619523596.7,71288133834463.38,74821188525063.01,78038479443565.73,81348003908221.62],
+    ebitda: [16195085553408.98,17122375291025.36,18182519953798.82,19086498327447.77,20095973456085.36],
+    gp: [30232700527413.06,31834013284883.92,33632233955908.35,35133323414805.18,36647563760703.74],
+    cogs: [37702918996183.64,39454120549579.46,41188954569154.66,42905156028760.55,44700440147517.88],
+    sell: [13671218936203.33,14376174293680.39,15075839519960.69,15748659745559.56,16432257189461.77],
+    ga: [1971789652476.63,2044687069988.22,2114437920178.28,2187479427299.97,2261794508668.62],
+    da: [1605393614675.88,1685044070512.4,1768683399563.75,1843913839308.73,1922266913476.91],
+    gm_pct: [44.5,44.7,44.9,45.0,45.0],
+    em_pct: [23.8,24.0,24.3,24.5,24.7],
+    cash: [6739507593096.57,11279832548583.97,16107178050254.43,21287416277316.97,26395099020113.31],
+  },
+  downside: {
+    rev: [65720742664480.0,68408613028877.65,71217564135070.35,74066346700473.16,77108920568492.49],
+    ebitda: [12062735510497.51,12658937791854.97,13409296453891.38,14003970501561.89,14801325771653.35],
+    gp: [25904553994939.2,27125376450178.67,28652430447592.58,29841251451590.58,31154254149617.71],
+    cogs: [39816188669540.8,41283236578699.0,42565133687477.77,44225095248882.6,45954666418874.78],
+    sell: [14119479592261.76,14695848920264.48,15305746289264.12,15921725441901.78,16568116522163.47],
+    ga: [2104263965664.96,2189075717124.56,2279362454322.25,2372924895815.14,2470005859993.76],
+    da: [2381925073483.04,2482000978469.59,2583013706782.55,2689119618526.06,2801192003988.87],
+    gm_pct: [39.4,39.6,40.2,40.3,40.4],
+    em_pct: [18.4,18.5,18.8,18.9,19.2],
+    cash: [3213887979568.04,3497428753604.63,3889555762019.09,4485744768757.68,5247316730028.03],
+  }
+};
+
+// MAPE data
+const mapeData = [
+  {metric:'Revenue',forecast:63227618907183.6,actual:63645886756227,ape:0.0066},
+  {metric:'COGS',forecast:37041267009631.0,actual:37436412561696,ape:0.0106},
+  {metric:'Gross Profit',forecast:26186351897552.6,actual:26209474194531,ape:0.0009},
+  {metric:'Selling',forecast:13363269814044.3,actual:13641689163684,ape:0.0204},
+  {metric:'G&A',forecast:1869960399489.5,actual:1904069825709,ape:0.0179},
+  {metric:'EBITDA',forecast:12785340379900.3,actual:12779960497496,ape:0.0004},
+];
+const wMAPE = 0.0064;
+
+// Bridge data (Base→Downside, FY2026E)
+const bridgeDown = [
+  {label:'EBITDA Base', value:14100746210842.1, type:'neutral'},
+  {label:'Revenue softness', value:-1107438429558.35, type:'neg'},
+  {label:'COGS inflation', value:-1055844834998.56, type:'neg'},
+  {label:'Selling pressure', value:115016019331.59, type:'pos'},
+  {label:'G&A overhead', value:99418532843.81, type:'neg'},
+  {label:'D&A effect', value:109708116385.74, type:'pos'},
+  {label:'EBITDA Downside', value:12062735510497.51, type:'neutral'},
+];
+
+const bridgeDrivers = [
+  {label:'Revenue growth', impact: D.upside.rev[0]-D.base.rev[0], dir:'pos'},
+  {label:'COGS efficiency', impact: -(D.upside.cogs[0]-D.base.cogs[0]), dir:'pos'},
+  {label:'Selling discipline', impact: -(D.upside.sell[0]-D.base.sell[0]), dir:'pos'},
+  {label:'G&A control', impact: -(D.upside.ga[0]-D.base.ga[0]), dir:'pos'},
+  {label:'Cash position', impact: D.upside.cash[0], dir:'neutral'},
+];
+
+function fmt(v, unit) {
+  const d = unit === 'T' ? T : B;
+  const s = unit === 'T' ? 'T' : 'B';
+  if (Math.abs(v) >= d) return (v/d).toFixed(1) + s;
+  return (v/B).toFixed(0) + 'B';
+}
+function fmtP(v) { return v.toFixed(1) + '%'; }
+
+let revChart, ebitdaChart;
+
+function updateDashboard() {
+  const scn = document.getElementById('scenarioSelect').value;
+  const yi = parseInt(document.getElementById('yearSelect').value);
+  const unit = document.getElementById('unitSelect').value;
+  const d = D[scn];
+  const yr = yrsF[yi];
+
+  // KPIs
+  document.getElementById('kv-rev').textContent = fmt(d.rev[yi], unit);
+  document.getElementById('ks-rev').textContent = `${((d.rev[yi]/revH[6]-1)*100).toFixed(1)}% vs FY2025`;
+  document.getElementById('kv-ebitda').textContent = fmt(d.ebitda[yi], unit);
+  document.getElementById('ks-ebitda').textContent = `${d.em_pct[yi]}% margin`;
+  document.getElementById('kv-gm').textContent = fmtP(d.gm_pct[yi]);
+  const gmDelta = d.gm_pct[yi] - gmH[6];
+  document.getElementById('ks-gm').textContent = `${gmDelta>=0?'+':''}${gmDelta.toFixed(1)} pts vs FY2025`;
+  document.getElementById('kv-em').textContent = fmtP(d.em_pct[yi]);
+  const emDelta = d.em_pct[yi] - emH[6];
+  document.getElementById('ks-em').textContent = `${emDelta>=0?'+':''}${emDelta.toFixed(1)} pts vs FY2025`;
+  document.getElementById('kv-cash').textContent = fmt(d.cash[yi], unit);
+  document.getElementById('ks-cash').textContent = `Dec ${2026+yi} ${scn} case`;
+  document.getElementById('kv-mape').textContent = fmtP(wMAPE*100);
+
+  // Charts
+  updateCharts(unit);
+
+  // Signoff table
+  const sb = document.getElementById('signoffBody');
+  const signoff = [
+    ['Revenue', fmt(revH[6],unit), fmt(D.base.rev[yi],unit), fmt(D.upside.rev[yi],unit), fmt(D.downside.rev[yi],unit),
+     `+${fmt(D.upside.rev[yi]-D.base.rev[yi],unit)} upside`],
+    ['EBITDA', fmt(ebitdaH[6],unit), fmt(D.base.ebitda[yi],unit), fmt(D.upside.ebitda[yi],unit), fmt(D.downside.ebitda[yi],unit),
+     `${fmt(D.downside.ebitda[yi]-D.base.ebitda[yi],unit)} downside`],
+    ['Gross Margin %', fmtP(gmH[6]), fmtP(D.base.gm_pct[yi]), fmtP(D.upside.gm_pct[yi]), fmtP(D.downside.gm_pct[yi]),
+     `+${(D.upside.gm_pct[yi]-D.base.gm_pct[yi]).toFixed(1)} pts upside`],
+    ['EBITDA Margin %', fmtP(emH[6]), fmtP(D.base.em_pct[yi]), fmtP(D.upside.em_pct[yi]), fmtP(D.downside.em_pct[yi]),
+     `+${(D.upside.em_pct[yi]-D.base.em_pct[yi]).toFixed(1)} pts upside`],
+    ['Ending Cash', '—', fmt(D.base.cash[yi],unit), fmt(D.upside.cash[yi],unit), fmt(D.downside.cash[yi],unit),
+     `${fmt(D.downside.cash[yi],unit)} downside floor`],
+    ['Forecast MAPE', fmtP(wMAPE*100), '—', '—', '—', 'Historical simulation accuracy'],
+  ];
+  sb.innerHTML = signoff.map(r => `<tr>${r.map((c,i) => {
+    let cls = '';
+    if (i===2) cls = 'style="background:#E2EFDA"';
+    if (i===3) cls = 'style="background:#DAEEF3"';
+    if (i===4) cls = 'style="background:#FDE9D9"';
+    return `<td ${cls}>${c}</td>`;
+  }).join('')}</tr>`).join('');
+
+  // MAPE table
+  const mb = document.getElementById('mapeBody');
+  mb.innerHTML = mapeData.map(m => `<tr><td>${m.metric}</td><td>${fmt(m.forecast,'T')}</td><td>${fmt(m.actual,'T')}</td><td class="${m.ape>0.01?'neg':'pos'}">${(m.ape*100).toFixed(2)}%</td></tr>`).join('');
+
+  // Bridge bars (upside drivers)
+  const bb = document.getElementById('bridgeBars');
+  const maxImpact = Math.max(...bridgeDrivers.filter(d=>d.label!=='Cash position').map(d=>Math.abs(d.impact)));
+  bb.innerHTML = bridgeDrivers.map(d => {
+    const pct = d.label==='Cash position' ? 50 : Math.abs(d.impact)/maxImpact*80;
+    const cls = d.impact >= 0 ? 'positive' : 'negative';
+    const val = d.label==='Cash position' ? fmt(D[scn].cash[yi],unit) : fmt(d.impact,unit);
+    return `<div class="bridge-bar"><div class="bar-label">${d.label}</div><div class="bar-container"><div class="bar ${cls}" style="width:${pct}%">${val}</div></div></div>`;
+  }).join('');
+
+  // EBITDA bridge
+  const eb = document.getElementById('ebitdaBridge');
+  const maxB = Math.max(...bridgeDown.map(d=>Math.abs(d.value)));
+  eb.innerHTML = bridgeDown.map(d => {
+    const pct = Math.abs(d.value)/maxB*90;
+    const cls = d.type==='neutral' ? 'neutral' : d.value>=0?'positive':'negative';
+    return `<div class="bridge-bar"><div class="bar-label">${d.label}</div><div class="bar-container"><div class="bar ${cls}" style="width:${pct}%">${fmt(d.value,unit)}</div></div></div>`;
+  }).join('');
+}
+
+function updateCharts(unit) {
+  const d = unit === 'T' ? T : B;
+  const allRevBase = [...revH.map(v=>v/d), ...D.base.rev.map(v=>v/d)];
+  const allRevUp = [...Array(7).fill(null), ...D.upside.rev.map(v=>v/d)];
+  const allRevDn = [...Array(7).fill(null), ...D.downside.rev.map(v=>v/d)];
+  const allEbBase = [...ebitdaH.map(v=>v/d), ...D.base.ebitda.map(v=>v/d)];
+  const allEbUp = [...Array(7).fill(null), ...D.upside.ebitda.map(v=>v/d)];
+  const allEbDn = [...Array(7).fill(null), ...D.downside.ebitda.map(v=>v/d)];
+
+  const chartOpts = (datasets, label) => ({
+    type: 'line',
+    data: { labels: years, datasets },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 16, font: { size: 11 } } },
+                 tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(1)} ${unit==='T'?'T':'B'}` } } },
+      scales: { y: { title: { display: true, text: unit==='T'?'Trillion VND':'Billion VND' }, grid: { color: '#f0f0f0' } },
+                x: { grid: { display: false } } },
+      interaction: { intersect: false, mode: 'index' }
+    }
+  });
+
+  if (revChart) revChart.destroy();
+  if (ebitdaChart) ebitdaChart.destroy();
+
+  revChart = new Chart(document.getElementById('revChart'), chartOpts([
+    { label: 'Actual', data: [...revH.map(v=>v/d), ...Array(5).fill(null)], borderColor: '#2F5496', backgroundColor: '#2F5496', pointRadius: 3, borderWidth: 2.5 },
+    { label: 'Base', data: allRevBase.map((v,i)=>i<6?null:v), borderColor: '#70AD47', borderDash: [], pointRadius: 3, borderWidth: 2 },
+    { label: 'Upside', data: allRevUp, borderColor: '#00B0F0', borderDash: [5,3], pointRadius: 2, borderWidth: 1.5 },
+    { label: 'Downside', data: allRevDn, borderColor: '#E74C3C', borderDash: [5,3], pointRadius: 2, borderWidth: 1.5 },
+  ], 'Revenue'));
+
+  ebitdaChart = new Chart(document.getElementById('ebitdaChart'), chartOpts([
+    { label: 'Actual', data: [...ebitdaH.map(v=>v/d), ...Array(5).fill(null)], borderColor: '#2F5496', backgroundColor: '#2F5496', pointRadius: 3, borderWidth: 2.5 },
+    { label: 'Base', data: allEbBase.map((v,i)=>i<6?null:v), borderColor: '#70AD47', pointRadius: 3, borderWidth: 2 },
+    { label: 'Upside', data: allEbUp, borderColor: '#00B0F0', borderDash: [5,3], pointRadius: 2, borderWidth: 1.5 },
+    { label: 'Downside', data: allEbDn, borderColor: '#E74C3C', borderDash: [5,3], pointRadius: 2, borderWidth: 1.5 },
+  ], 'EBITDA'));
+}
+
+updateDashboard();
+</script>
+</body>
+</html>
