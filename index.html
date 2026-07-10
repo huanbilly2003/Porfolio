@@ -2,65 +2,955 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title> Huynh Lam Hoang Huan | FP&A / Finance BI</title>
-  <link rel="stylesheet" href="style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hoang Huan | FP&A & M&A Portfolio</title>
+  <meta name="description" content="Portfolio by Hoang Huan — FP&A and M&A professional combining finance fundamentals, data analytics, and deal execution.">
+  <meta name="author" content="Hoang Huan">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    /* ========== RESET & BASE ========== */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg-primary: #07111f;
+      --bg-secondary: #0c1a2e;
+      --bg-card: #111e33;
+      --bg-card-hover: #162847;
+      --border: #1a2d4a;
+      --border-light: #243a5e;
+      --text-primary: #e8edf5;
+      --text-secondary: #8899b3;
+      --text-muted: #5a6f8f;
+      --accent: #3b82f6;
+      --accent-glow: rgba(59, 130, 246, 0.15);
+      --accent-secondary: #06b6d4;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --gradient-accent: linear-gradient(135deg, #3b82f6, #06b6d4);
+      --gradient-bg: linear-gradient(180deg, #07111f 0%, #0c1a2e 100%);
+      --font-main: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --radius: 12px;
+      --radius-sm: 8px;
+      --shadow: 0 4px 24px rgba(0,0,0,0.3);
+      --shadow-lg: 0 8px 40px rgba(0,0,0,0.4);
+      --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+    body {
+      font-family: var(--font-main);
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.7;
+      overflow-x: hidden;
+    }
+    a { color: var(--accent); text-decoration: none; transition: var(--transition); }
+    a:hover { color: var(--accent-secondary); }
+    img { max-width: 100%; display: block; }
+    ::selection { background: var(--accent); color: #fff; }
+
+    /* ========== NAVBAR ========== */
+    .navbar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+      background: rgba(7, 17, 31, 0.85);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      transition: var(--transition);
+    }
+    .navbar.scrolled { background: rgba(7, 17, 31, 0.95); box-shadow: var(--shadow); }
+    .nav-container {
+      max-width: 1200px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 2rem; height: 70px;
+    }
+    .nav-logo {
+      font-size: 1.3rem; font-weight: 700;
+      background: var(--gradient-accent); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      letter-spacing: -0.5px;
+    }
+    .nav-links { display: flex; gap: 0.25rem; list-style: none; }
+    .nav-links a {
+      padding: 0.5rem 1rem; border-radius: var(--radius-sm);
+      color: var(--text-secondary); font-size: 0.9rem; font-weight: 500;
+      transition: var(--transition);
+    }
+    .nav-links a:hover, .nav-links a.active {
+      color: var(--text-primary); background: var(--accent-glow);
+    }
+    .nav-cta {
+      padding: 0.5rem 1.25rem !important;
+      background: var(--gradient-accent) !important;
+      color: #fff !important; border-radius: var(--radius-sm) !important;
+      font-weight: 600 !important;
+    }
+    .nav-cta:hover { opacity: 0.9; transform: translateY(-1px); }
+    .menu-toggle {
+      display: none; background: none; border: none; color: var(--text-primary);
+      font-size: 1.5rem; cursor: pointer;
+    }
+
+    /* ========== HERO ========== */
+    .hero {
+      min-height: 100vh; display: flex; align-items: center;
+      position: relative; overflow: hidden;
+      padding: 120px 2rem 80px;
+    }
+    .hero::before {
+      content: ''; position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 40%, rgba(59,130,246,0.08), transparent),
+        radial-gradient(ellipse 60% 50% at 80% 60%, rgba(6,182,212,0.06), transparent);
+    }
+    .hero-container {
+      max-width: 1200px; margin: 0 auto; width: 100%;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center;
+      position: relative; z-index: 1;
+    }
+    .hero-content { max-width: 600px; }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.4rem 1rem; border-radius: 50px;
+      background: var(--accent-glow); border: 1px solid var(--border-light);
+      color: var(--accent); font-size: 0.85rem; font-weight: 500;
+      margin-bottom: 1.5rem;
+    }
+    .hero-badge .dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--success);
+      animation: pulse-dot 2s infinite;
+    }
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; } 50% { opacity: 0.4; }
+    }
+    .hero h1 {
+      font-size: clamp(2.2rem, 5vw, 3.5rem);
+      font-weight: 800; line-height: 1.15;
+      margin-bottom: 1.5rem; letter-spacing: -1px;
+    }
+    .hero h1 .gradient {
+      background: var(--gradient-accent); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .hero-desc {
+      font-size: 1.1rem; color: var(--text-secondary);
+      line-height: 1.8; margin-bottom: 2rem;
+    }
+    .hero-buttons { display: flex; gap: 1rem; flex-wrap: wrap; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.75rem 1.75rem; border-radius: var(--radius-sm);
+      font-weight: 600; font-size: 0.95rem;
+      transition: var(--transition); cursor: pointer; border: none;
+    }
+    .btn-primary {
+      background: var(--gradient-accent); color: #fff;
+      box-shadow: 0 4px 15px rgba(59,130,246,0.3);
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 25px rgba(59,130,246,0.4); color: #fff; }
+    .btn-outline {
+      background: transparent; color: var(--text-primary);
+      border: 1px solid var(--border-light);
+    }
+    .btn-outline:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-glow); }
+    .hero-visual {
+      display: flex; justify-content: center; align-items: center;
+    }
+    .hero-card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 2rem;
+      box-shadow: var(--shadow-lg); width: 100%; max-width: 400px;
+    }
+    .hero-card-header {
+      display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;
+    }
+    .hero-avatar {
+      width: 64px; height: 64px; border-radius: 50%;
+      background: var(--gradient-accent);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem; font-weight: 700; color: #fff;
+    }
+    .hero-card-name { font-weight: 700; font-size: 1.1rem; }
+    .hero-card-role { color: var(--text-secondary); font-size: 0.9rem; }
+    .hero-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .stat-item {
+      background: var(--bg-secondary); border-radius: var(--radius-sm);
+      padding: 1rem; text-align: center;
+    }
+    .stat-value {
+      font-size: 1.5rem; font-weight: 700;
+      background: var(--gradient-accent); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .stat-label { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem; }
+
+    /* ========== SECTIONS ========== */
+    section { padding: 100px 2rem; }
+    .section-container { max-width: 1200px; margin: 0 auto; }
+    .section-header { text-align: center; margin-bottom: 4rem; }
+    .section-label {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      font-family: var(--font-mono); font-size: 0.85rem;
+      color: var(--accent); text-transform: uppercase; letter-spacing: 2px;
+      margin-bottom: 1rem;
+    }
+    .section-title {
+      font-size: clamp(1.8rem, 4vw, 2.5rem);
+      font-weight: 800; letter-spacing: -0.5px; margin-bottom: 1rem;
+    }
+    .section-desc { color: var(--text-secondary); max-width: 600px; margin: 0 auto; font-size: 1.05rem; }
+
+    /* ========== ABOUT ========== */
+    #about { background: var(--bg-secondary); }
+    .about-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: start;
+    }
+    .about-text p { color: var(--text-secondary); margin-bottom: 1.25rem; font-size: 1.05rem; }
+    .about-highlights {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem;
+    }
+    .highlight-card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.5rem;
+      transition: var(--transition);
+    }
+    .highlight-card:hover { border-color: var(--accent); transform: translateY(-3px); box-shadow: var(--shadow); }
+    .highlight-icon {
+      width: 44px; height: 44px; border-radius: 10px;
+      background: var(--accent-glow); display: flex; align-items: center; justify-content: center;
+      color: var(--accent); font-size: 1.2rem; margin-bottom: 0.75rem;
+    }
+    .highlight-card h4 { font-weight: 600; margin-bottom: 0.35rem; font-size: 0.95rem; }
+    .highlight-card p { color: var(--text-muted); font-size: 0.85rem; line-height: 1.5; }
+
+    /* ========== CV / EXPERIENCE ========== */
+    .cv-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 3rem; flex-wrap: wrap; gap: 1rem; }
+    .timeline { position: relative; padding-left: 2rem; }
+    .timeline::before {
+      content: ''; position: absolute; left: 7px; top: 0; bottom: 0;
+      width: 2px; background: var(--border-light);
+    }
+    .timeline-item { position: relative; margin-bottom: 2.5rem; }
+    .timeline-dot {
+      position: absolute; left: -2rem; top: 6px;
+      width: 16px; height: 16px; border-radius: 50%;
+      background: var(--bg-primary); border: 3px solid var(--accent);
+    }
+    .timeline-item.current .timeline-dot {
+      background: var(--accent);
+      box-shadow: 0 0 0 4px var(--accent-glow);
+    }
+    .timeline-date {
+      font-family: var(--font-mono); font-size: 0.8rem;
+      color: var(--accent); margin-bottom: 0.35rem;
+    }
+    .timeline-title { font-weight: 700; font-size: 1.1rem; margin-bottom: 0.15rem; }
+    .timeline-company { color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 0.5rem; }
+    .timeline-desc { color: var(--text-muted); font-size: 0.9rem; line-height: 1.6; }
+    .cv-sidebar { display: grid; gap: 1.5rem; }
+    .cv-card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.5rem;
+    }
+    .cv-card h4 {
+      font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1.5px;
+      color: var(--accent); margin-bottom: 1rem;
+    }
+    .skill-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .skill-tag {
+      padding: 0.3rem 0.75rem; border-radius: 50px;
+      background: var(--accent-glow); border: 1px solid var(--border);
+      font-size: 0.8rem; color: var(--text-secondary); font-weight: 500;
+      transition: var(--transition);
+    }
+    .skill-tag:hover { border-color: var(--accent); color: var(--accent); }
+    .cv-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 3rem; }
+
+    /* ========== PROJECTS ========== */
+    #projects { background: var(--bg-secondary); }
+    .project-tabs {
+      display: flex; justify-content: center; gap: 0.5rem;
+      margin-bottom: 3rem;
+    }
+    .tab-btn {
+      padding: 0.6rem 1.5rem; border-radius: 50px;
+      background: transparent; border: 1px solid var(--border);
+      color: var(--text-secondary); font-weight: 600;
+      font-size: 0.9rem; cursor: pointer;
+      font-family: var(--font-main);
+      transition: var(--transition);
+    }
+    .tab-btn:hover { border-color: var(--accent); color: var(--text-primary); }
+    .tab-btn.active {
+      background: var(--gradient-accent); color: #fff;
+      border-color: transparent;
+      box-shadow: 0 4px 15px rgba(59,130,246,0.3);
+    }
+    .projects-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 1.5rem;
+    }
+    .project-card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius); overflow: hidden;
+      transition: var(--transition);
+    }
+    .project-card:hover { border-color: var(--accent); transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+    .project-card[data-category] { display: block; }
+    .project-card.hidden { display: none; }
+    .project-thumb {
+      height: 200px; background: var(--bg-secondary);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 3rem; color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+      position: relative; overflow: hidden;
+    }
+    .project-thumb-gradient {
+      position: absolute; inset: 0;
+      opacity: 0.15;
+    }
+    .project-thumb-gradient.fpa { background: linear-gradient(135deg, #3b82f6, #06b6d4); }
+    .project-thumb-gradient.ma { background: linear-gradient(135deg, #f59e0b, #ef4444); }
+    .project-body { padding: 1.5rem; }
+    .project-category {
+      font-family: var(--font-mono); font-size: 0.75rem;
+      color: var(--accent); text-transform: uppercase; letter-spacing: 1.5px;
+      margin-bottom: 0.5rem;
+    }
+    .project-card[data-category="ma"] .project-category { color: var(--warning); }
+    .project-body h3 { font-weight: 700; font-size: 1.1rem; margin-bottom: 0.5rem; }
+    .project-body p { color: var(--text-muted); font-size: 0.9rem; line-height: 1.6; margin-bottom: 1rem; }
+    .project-tools { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 1rem; }
+    .project-tool {
+      padding: 0.2rem 0.6rem; border-radius: 4px;
+      background: var(--bg-secondary); font-size: 0.75rem;
+      color: var(--text-secondary); font-family: var(--font-mono);
+    }
+    .project-links { display: flex; gap: 0.75rem; }
+    .project-link {
+      font-size: 0.85rem; font-weight: 500;
+      display: inline-flex; align-items: center; gap: 0.35rem;
+    }
+
+    /* ========== CONTACT ========== */
+    .contact-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 3rem;
+      align-items: start;
+    }
+    .contact-info { display: grid; gap: 1.25rem; }
+    .contact-item {
+      display: flex; align-items: center; gap: 1rem;
+      padding: 1rem 1.25rem; background: var(--bg-card);
+      border: 1px solid var(--border); border-radius: var(--radius-sm);
+      transition: var(--transition);
+    }
+    .contact-item:hover { border-color: var(--accent); }
+    .contact-icon {
+      width: 44px; height: 44px; border-radius: 10px;
+      background: var(--accent-glow); display: flex;
+      align-items: center; justify-content: center;
+      color: var(--accent); font-size: 1.1rem; flex-shrink: 0;
+    }
+    .contact-item .label { font-size: 0.8rem; color: var(--text-muted); }
+    .contact-item .value { font-weight: 600; font-size: 0.95rem; }
+    .contact-form {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 2rem;
+    }
+    .contact-form h3 { font-weight: 700; margin-bottom: 1.5rem; }
+    .form-group { margin-bottom: 1.25rem; }
+    .form-group label {
+      display: block; font-size: 0.85rem; color: var(--text-secondary);
+      margin-bottom: 0.4rem; font-weight: 500;
+    }
+    .form-group input, .form-group textarea {
+      width: 100%; padding: 0.75rem 1rem;
+      background: var(--bg-secondary); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); color: var(--text-primary);
+      font-family: var(--font-main); font-size: 0.95rem;
+      transition: var(--transition); outline: none;
+    }
+    .form-group input:focus, .form-group textarea:focus { border-color: var(--accent); }
+    .form-group textarea { min-height: 120px; resize: vertical; }
+    .form-submit { width: 100%; }
+
+    /* ========== FOOTER ========== */
+    footer {
+      text-align: center; padding: 2rem;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted); font-size: 0.85rem;
+    }
+    .footer-socials {
+      display: flex; justify-content: center; gap: 1rem; margin-bottom: 1rem;
+    }
+    .footer-socials a {
+      width: 40px; height: 40px; border-radius: 50%;
+      border: 1px solid var(--border); display: flex;
+      align-items: center; justify-content: center;
+      color: var(--text-secondary); transition: var(--transition);
+    }
+    .footer-socials a:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-glow); }
+
+    /* ========== SCROLL ANIMATIONS ========== */
+    .fade-in {
+      opacity: 0; transform: translateY(30px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+    /* ========== RESPONSIVE ========== */
+    @media (max-width: 968px) {
+      .hero-container { grid-template-columns: 1fr; text-align: center; }
+      .hero-content { max-width: 100%; }
+      .hero-buttons { justify-content: center; }
+      .hero-visual { margin-top: 2rem; }
+      .about-grid { grid-template-columns: 1fr; }
+      .cv-grid { grid-template-columns: 1fr; }
+      .contact-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .nav-links.open {
+        display: flex; flex-direction: column;
+        position: absolute; top: 70px; left: 0; right: 0;
+        background: rgba(7, 17, 31, 0.98);
+        padding: 1rem; border-bottom: 1px solid var(--border);
+      }
+      .menu-toggle { display: block; }
+      section { padding: 60px 1.25rem; }
+      .projects-grid { grid-template-columns: 1fr; }
+      .about-highlights { grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
 <body>
-  <section class="hero">...</section>
-  <section class="case-studies">...</section>
-  <section class="skills">...</section>
-  <section class="contact">...</section>
+
+<!-- ========== NAVBAR ========== -->
+<nav class="navbar" id="navbar">
+  <div class="nav-container">
+    <a href="#" class="nav-logo">HH</a>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#about">About</a></li>
+      <li><a href="#experience">CV</a></li>
+      <li><a href="#projects">Projects</a></li>
+      <li><a href="#contact" class="nav-cta">Contact</a></li>
+    </ul>
+    <button class="menu-toggle" id="menuToggle" aria-label="Menu">
+      <i class="fas fa-bars"></i>
+    </button>
+  </div>
+</nav>
+
+<!-- ========== HERO ========== -->
+<section class="hero" id="hero">
+  <div class="hero-container">
+    <div class="hero-content">
+      <div class="hero-badge">
+        <span class="dot"></span>
+        Open to opportunities
+      </div>
+      <h1>
+        <span class="gradient">FP&A & M&A</span><br>
+        that drives decisions.
+      </h1>
+      <p class="hero-desc">
+        <!-- EDIT: Thay doi mo ta ngan ve ban than -->
+        I combine finance fundamentals, analytical modeling, and deal execution to deliver actionable insights for leadership decisions.
+      </p>
+      <div class="hero-buttons">
+        <a href="#projects" class="btn btn-primary">
+          <i class="fas fa-folder-open"></i> View Projects
+        </a>
+        <a href="#experience" class="btn btn-outline">
+          <i class="fas fa-file-alt"></i> View CV
+        </a>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="hero-card">
+        <div class="hero-card-header">
+          <div class="hero-avatar">HH</div>
+          <div>
+            <!-- EDIT: Ten va vi tri cua ban -->
+            <div class="hero-card-name">Hoang Huan</div>
+            <div class="hero-card-role">FP&A & M&A Analyst</div>
+          </div>
+        </div>
+        <div class="hero-stats">
+          <!-- EDIT: Thay doi cac so lieu noi bat -->
+          <div class="stat-item">
+            <div class="stat-value">X+</div>
+            <div class="stat-label">Years Experience</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value">X+</div>
+            <div class="stat-label">Projects Completed</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value">X+</div>
+            <div class="stat-label">Deals Analyzed</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value">GPA</div>
+            <div class="stat-label">Academic Score</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== ABOUT ========== -->
+<section id="about" class="fade-in">
+  <div class="section-container">
+    <div class="section-header">
+      <div class="section-label"><i class="fas fa-user"></i> About Me</div>
+      <h2 class="section-title">Finance professional with dual expertise.</h2>
+      <p class="section-desc">Bridging FP&A insights and M&A execution to help organizations grow strategically.</p>
+    </div>
+    <div class="about-grid">
+      <div class="about-text">
+        <!-- EDIT: Thay doi noi dung gioi thieu -->
+        <p>
+          I am a finance professional passionate about turning complex financial data into clear, actionable insights.
+          With experience spanning both FP&A and M&A, I bring a unique perspective that combines operational finance discipline with strategic deal thinking.
+        </p>
+        <p>
+          My approach is grounded in rigorous analysis, clear communication, and a commitment to delivering outputs that leadership teams can trust and act upon.
+        </p>
+        <p>
+          Based in Ho Chi Minh City, Vietnam. Open to opportunities in corporate finance, investment banking, and strategic finance roles.
+        </p>
+      </div>
+      <div class="about-highlights">
+        <div class="highlight-card">
+          <div class="highlight-icon"><i class="fas fa-chart-line"></i></div>
+          <h4>FP&A Excellence</h4>
+          <p>Budgeting, forecasting, variance analysis, and management reporting.</p>
+        </div>
+        <div class="highlight-card">
+          <div class="highlight-icon"><i class="fas fa-handshake"></i></div>
+          <h4>M&A Execution</h4>
+          <p>Deal screening, valuation, due diligence, and transaction support.</p>
+        </div>
+        <div class="highlight-card">
+          <div class="highlight-icon"><i class="fas fa-database"></i></div>
+          <h4>Data-Driven</h4>
+          <p>Power BI, SQL, Python, and Excel modeling for better decisions.</p>
+        </div>
+        <div class="highlight-card">
+          <div class="highlight-icon"><i class="fas fa-globe"></i></div>
+          <h4>Global Mindset</h4>
+          <p>Cross-functional communication, multi-entity finance, and MNC readiness.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== CV / EXPERIENCE ========== -->
+<section id="experience" class="fade-in">
+  <div class="section-container">
+    <div class="cv-top">
+      <div>
+        <div class="section-label"><i class="fas fa-briefcase"></i> Experience & Education</div>
+        <h2 class="section-title">Career journey.</h2>
+      </div>
+      <!-- EDIT: Link toi file CV PDF cua ban (dat trong folder assets/) -->
+      <a href="assets/cv.pdf" target="_blank" class="btn btn-outline">
+        <i class="fas fa-download"></i> Download CV (PDF)
+      </a>
+    </div>
+    <div class="cv-grid">
+      <div class="timeline">
+        <!-- EDIT: Thay doi kinh nghiem lam viec -->
+        <div class="timeline-item current">
+          <div class="timeline-dot"></div>
+          <div class="timeline-date">2024 - Present</div>
+          <div class="timeline-title">FP&A / M&A Analyst</div>
+          <div class="timeline-company">Company Name</div>
+          <div class="timeline-desc">
+            Responsible for budgeting, forecasting, variance analysis, and supporting M&A deal pipeline including valuation and due diligence.
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-date">2023 - 2024</div>
+          <div class="timeline-title">Finance Analyst / Intern</div>
+          <div class="timeline-company">Company Name</div>
+          <div class="timeline-desc">
+            Supported financial planning processes, built reporting dashboards, and assisted with transaction screening.
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-date">2020 - 2024</div>
+          <div class="timeline-title">Bachelor of Finance</div>
+          <div class="timeline-company">University Name</div>
+          <div class="timeline-desc">
+            GPA: X.X / 4.0. Relevant coursework in corporate finance, investment analysis, financial modeling, and accounting.
+          </div>
+        </div>
+      </div>
+      <div class="cv-sidebar">
+        <div class="cv-card">
+          <h4>Finance Skills</h4>
+          <div class="skill-tags">
+            <!-- EDIT: Thay doi cac skills -->
+            <span class="skill-tag">FP&A</span>
+            <span class="skill-tag">Budgeting</span>
+            <span class="skill-tag">Forecasting</span>
+            <span class="skill-tag">Variance Analysis</span>
+            <span class="skill-tag">M&A Valuation</span>
+            <span class="skill-tag">Due Diligence</span>
+            <span class="skill-tag">Financial Modeling</span>
+            <span class="skill-tag">DCF</span>
+            <span class="skill-tag">Comparable Analysis</span>
+            <span class="skill-tag">Working Capital</span>
+          </div>
+        </div>
+        <div class="cv-card">
+          <h4>Technical Skills</h4>
+          <div class="skill-tags">
+            <span class="skill-tag">Power BI</span>
+            <span class="skill-tag">SQL</span>
+            <span class="skill-tag">Python</span>
+            <span class="skill-tag">Advanced Excel</span>
+            <span class="skill-tag">VBA</span>
+            <span class="skill-tag">DAX</span>
+            <span class="skill-tag">Power Query</span>
+          </div>
+        </div>
+        <div class="cv-card">
+          <h4>Languages</h4>
+          <div class="skill-tags">
+            <span class="skill-tag">Vietnamese (Native)</span>
+            <span class="skill-tag">English (Professional)</span>
+          </div>
+        </div>
+        <div class="cv-card">
+          <h4>Certifications</h4>
+          <div class="skill-tags">
+            <!-- EDIT: Them cac chung chi -->
+            <span class="skill-tag">CFA Level I (if applicable)</span>
+            <span class="skill-tag">FMVA (if applicable)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== PROJECTS ========== -->
+<section id="projects" class="fade-in">
+  <div class="section-container">
+    <div class="section-header">
+      <div class="section-label"><i class="fas fa-rocket"></i> Projects</div>
+      <h2 class="section-title">Selected work across FP&A and M&A.</h2>
+      <p class="section-desc">Real-world projects demonstrating analytical depth, strategic thinking, and technical execution.</p>
+    </div>
+
+    <div class="project-tabs">
+      <button class="tab-btn active" data-filter="all">All Projects</button>
+      <button class="tab-btn" data-filter="fpa"><i class="fas fa-chart-bar"></i> FP&A</button>
+      <button class="tab-btn" data-filter="ma"><i class="fas fa-handshake"></i> M&A</button>
+    </div>
+
+    <div class="projects-grid" id="projectsGrid">
+
+      <!-- FP&A Project 1 -->
+      <div class="project-card" data-category="fpa">
+        <div class="project-thumb">
+          <div class="project-thumb-gradient fpa"></div>
+          <i class="fas fa-chart-line"></i>
+        </div>
+        <div class="project-body">
+          <div class="project-category">FP&A</div>
+          <!-- EDIT: Thay doi ten va mo ta project -->
+          <h3>Monthly FP&A Performance Pack</h3>
+          <p>Executive reporting dashboard covering Actual vs Budget vs Forecast, variance bridges, and drilldowns by business unit.</p>
+          <div class="project-tools">
+            <span class="project-tool">Power BI</span>
+            <span class="project-tool">DAX</span>
+            <span class="project-tool">Excel</span>
+          </div>
+          <div class="project-links">
+            <a href="#" class="project-link"><i class="fas fa-external-link-alt"></i> Case Study</a>
+            <a href="#" class="project-link"><i class="fab fa-github"></i> GitHub</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- FP&A Project 2 -->
+      <div class="project-card" data-category="fpa">
+        <div class="project-thumb">
+          <div class="project-thumb-gradient fpa"></div>
+          <i class="fas fa-calculator"></i>
+        </div>
+        <div class="project-body">
+          <div class="project-category">FP&A</div>
+          <h3>Driver-Based Forecasting Model</h3>
+          <p>Revenue, cost, and headcount forecasting with scenario analysis and accuracy tracking.</p>
+          <div class="project-tools">
+            <span class="project-tool">Excel</span>
+            <span class="project-tool">Python</span>
+            <span class="project-tool">SQL</span>
+          </div>
+          <div class="project-links">
+            <a href="#" class="project-link"><i class="fas fa-external-link-alt"></i> Case Study</a>
+            <a href="#" class="project-link"><i class="fab fa-github"></i> GitHub</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- FP&A Project 3 -->
+      <div class="project-card" data-category="fpa">
+        <div class="project-thumb">
+          <div class="project-thumb-gradient fpa"></div>
+          <i class="fas fa-file-invoice-dollar"></i>
+        </div>
+        <div class="project-body">
+          <div class="project-category">FP&A</div>
+          <h3>Variance Analysis & Reporting Automation</h3>
+          <p>Automated monthly variance commentary and P&L bridge generation with Python pipeline.</p>
+          <div class="project-tools">
+            <span class="project-tool">Python</span>
+            <span class="project-tool">pandas</span>
+            <span class="project-tool">Power BI</span>
+          </div>
+          <div class="project-links">
+            <a href="#" class="project-link"><i class="fas fa-external-link-alt"></i> Case Study</a>
+            <a href="#" class="project-link"><i class="fab fa-github"></i> GitHub</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- M&A Project 1 -->
+      <div class="project-card" data-category="ma">
+        <div class="project-thumb">
+          <div class="project-thumb-gradient ma"></div>
+          <i class="fas fa-search-dollar"></i>
+        </div>
+        <div class="project-body">
+          <div class="project-category">M&A</div>
+          <h3>Target Company Valuation</h3>
+          <p>DCF, comparable companies, and precedent transactions analysis for acquisition target screening.</p>
+          <div class="project-tools">
+            <span class="project-tool">Excel</span>
+            <span class="project-tool">Financial Modeling</span>
+            <span class="project-tool">DCF</span>
+          </div>
+          <div class="project-links">
+            <a href="#" class="project-link"><i class="fas fa-external-link-alt"></i> Case Study</a>
+            <a href="#" class="project-link"><i class="fab fa-github"></i> GitHub</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- M&A Project 2 -->
+      <div class="project-card" data-category="ma">
+        <div class="project-thumb">
+          <div class="project-thumb-gradient ma"></div>
+          <i class="fas fa-balance-scale"></i>
+        </div>
+        <div class="project-body">
+          <div class="project-category">M&A</div>
+          <h3>Due Diligence & Synergy Analysis</h3>
+          <p>Financial due diligence workbook with revenue synergy quantification and integration cost modeling.</p>
+          <div class="project-tools">
+            <span class="project-tool">Excel</span>
+            <span class="project-tool">PowerPoint</span>
+            <span class="project-tool">SQL</span>
+          </div>
+          <div class="project-links">
+            <a href="#" class="project-link"><i class="fas fa-external-link-alt"></i> Case Study</a>
+            <a href="#" class="project-link"><i class="fab fa-github"></i> GitHub</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- M&A Project 3 -->
+      <div class="project-card" data-category="ma">
+        <div class="project-thumb">
+          <div class="project-thumb-gradient ma"></div>
+          <i class="fas fa-project-diagram"></i>
+        </div>
+        <div class="project-body">
+          <div class="project-category">M&A</div>
+          <h3>Deal Pipeline & Market Screening</h3>
+          <p>Industry landscape mapping and target identification with scoring framework for strategic acquisitions.</p>
+          <div class="project-tools">
+            <span class="project-tool">Python</span>
+            <span class="project-tool">Power BI</span>
+            <span class="project-tool">Excel</span>
+          </div>
+          <div class="project-links">
+            <a href="#" class="project-link"><i class="fas fa-external-link-alt"></i> Case Study</a>
+            <a href="#" class="project-link"><i class="fab fa-github"></i> GitHub</a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ========== CONTACT ========== -->
+<section id="contact" class="fade-in">
+  <div class="section-container">
+    <div class="section-header">
+      <div class="section-label"><i class="fas fa-envelope"></i> Contact</div>
+      <h2 class="section-title">Let's connect.</h2>
+      <p class="section-desc">Available for FP&A and M&A roles. Open to Vietnam-based and international opportunities.</p>
+    </div>
+    <div class="contact-grid">
+      <div class="contact-info">
+        <!-- EDIT: Thay doi thong tin lien he -->
+        <a href="mailto:your.email@example.com" class="contact-item">
+          <div class="contact-icon"><i class="fas fa-envelope"></i></div>
+          <div>
+            <div class="label">Email</div>
+            <div class="value">your.email@example.com</div>
+          </div>
+        </a>
+        <a href="tel:+84XXXXXXXXX" class="contact-item">
+          <div class="contact-icon"><i class="fas fa-phone"></i></div>
+          <div>
+            <div class="label">Phone</div>
+            <div class="value">+84 XXX XXX XXX</div>
+          </div>
+        </a>
+        <a href="https://linkedin.com/in/your-profile" target="_blank" class="contact-item">
+          <div class="contact-icon"><i class="fab fa-linkedin"></i></div>
+          <div>
+            <div class="label">LinkedIn</div>
+            <div class="value">linkedin.com/in/your-profile</div>
+          </div>
+        </a>
+        <a href="https://github.com/your-username" target="_blank" class="contact-item">
+          <div class="contact-icon"><i class="fab fa-github"></i></div>
+          <div>
+            <div class="label">GitHub</div>
+            <div class="value">github.com/your-username</div>
+          </div>
+        </a>
+        <div class="contact-item">
+          <div class="contact-icon"><i class="fas fa-map-marker-alt"></i></div>
+          <div>
+            <div class="label">Location</div>
+            <div class="value">Ho Chi Minh City, Vietnam</div>
+          </div>
+        </div>
+      </div>
+      <div class="contact-form">
+        <h3>Send a message</h3>
+        <!-- EDIT: Thay your.email@example.com bang email cua ban -->
+        <form action="https://formspree.io/f/your-form-id" method="POST">
+          <div class="form-group">
+            <label for="name">Name</label>
+            <input type="text" id="name" name="name" placeholder="Your name" required>
+          </div>
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" placeholder="your@email.com" required>
+          </div>
+          <div class="form-group">
+            <label for="message">Message</label>
+            <textarea id="message" name="message" placeholder="Tell me about the opportunity..." required></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary form-submit">
+            <i class="fas fa-paper-plane"></i> Send Message
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== FOOTER ========== -->
+<footer>
+  <div class="footer-socials">
+    <a href="https://linkedin.com/in/your-profile" target="_blank" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+    <a href="https://github.com/your-username" target="_blank" aria-label="GitHub"><i class="fab fa-github"></i></a>
+    <a href="mailto:your.email@example.com" aria-label="Email"><i class="fas fa-envelope"></i></a>
+  </div>
+  <!-- EDIT: Thay doi ten -->
+  <p>&copy; 2026 Hoang Huan. Built with purpose.</p>
+</footer>
+
+<!-- ========== JAVASCRIPT ========== -->
+<script>
+  // Navbar scroll effect
+  const navbar = document.getElementById('navbar');
+  window.addEventListener('scroll', () => {
+    navbar.classList.toggle('scrolled', window.scrollY > 50);
+  });
+
+  // Mobile menu
+  const menuToggle = document.getElementById('menuToggle');
+  const navLinks = document.getElementById('navLinks');
+  menuToggle.addEventListener('click', () => {
+    navLinks.classList.toggle('open');
+    const icon = menuToggle.querySelector('i');
+    icon.classList.toggle('fa-bars');
+    icon.classList.toggle('fa-times');
+  });
+  navLinks.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', () => {
+      navLinks.classList.remove('open');
+      menuToggle.querySelector('i').classList.add('fa-bars');
+      menuToggle.querySelector('i').classList.remove('fa-times');
+    });
+  });
+
+  // Active nav on scroll
+  const sections = document.querySelectorAll('section[id]');
+  window.addEventListener('scroll', () => {
+    const scrollY = window.scrollY + 100;
+    sections.forEach(section => {
+      const top = section.offsetTop;
+      const height = section.offsetHeight;
+      const id = section.getAttribute('id');
+      const link = document.querySelector(`.nav-links a[href="#${id}"]`);
+      if (link) {
+        link.classList.toggle('active', scrollY >= top && scrollY < top + height);
+      }
+    });
+  });
+
+  // Project tab filtering
+  const tabBtns = document.querySelectorAll('.tab-btn');
+  const projectCards = document.querySelectorAll('.project-card');
+  tabBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      tabBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const filter = btn.dataset.filter;
+      projectCards.forEach(card => {
+        if (filter === 'all' || card.dataset.category === filter) {
+          card.classList.remove('hidden');
+          card.style.animation = 'fadeUp 0.4s ease forwards';
+        } else {
+          card.classList.add('hidden');
+        }
+      });
+    });
+  });
+
+  // Scroll reveal
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+  // Fade-up keyframe
+  const style = document.createElement('style');
+  style.textContent = `@keyframes fadeUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }`;
+  document.head.appendChild(style);
+</script>
+
 </body>
 </html>
-<section class="hero">
-  <h1>Turning messy Vietnamese financial statements into <span class="accent">decision-ready numbers</span>.</h1>
-  <p>Mình chuyên xử lý và chuẩn hóa báo cáo tài chính theo VAS/IFRS, biến số liệu thô thành dữ liệu đáng tin cậy cho việc ra quyết định.</p>
-
-  <div class="stats">
-    <div>
-      <span class="stat-number">81</span>
-      <span class="stat-label">Cross-validation checks</span>
-    </div>
-    <div>
-      <span class="stat-number">6</span>
-      <span class="stat-label">Sheets structured</span>
-    </div>
-    <div>
-      <span class="stat-number">0</span>
-      <span class="stat-label">Silent errors</span>
-    </div>
-  </div>
-</section>
-<section class="case-studies">
-  <h2>Case Studies</h2>
-
-  <div class="case-card">
-    <span class="tag">VAS → Excel Automation</span>
-    <h3>Trích xuất BCTC hợp nhất kiểm toán FY2023</h3>
-    <p>Chuyển đổi báo cáo tài chính kiểm toán (BCTC hợp nhất) thành workbook Excel 6 sheet — Balance Sheet, Income Statement, Cash Flow và Notes — với 81 checks cross-validation đảm bảo khớp 100% giữa các số liệu.</p>
-  </div>
-
-  <div class="case-card">
-    <span class="tag">VAS ↔ IFRS Mapping</span>
-    <h3>Chuyển đổi khoản mục Bảng cân đối kế toán VAS sang IFRS</h3>
-    <p>Ánh xạ chi tiết các khoản mục Bảng cân đối kế toán theo VAS sang chuẩn IFRS tương ứng, bao gồm phân loại theo IFRS 9 (Business Model Test, SPPI Test).</p>
-  </div>
-</section>
-
-<section class="skills">
-  <h2>Skills & Tools</h2>
-  <div class="skill-grid">
-    <div class="skill-item">VAS / Thông tư 200</div>
-    <div class="skill-item">IFRS Mapping</div>
-    <div class="skill-item">Excel (openpyxl)</div>
-    <div class="skill-item">Financial Statement Analysis</div>
-    <div class="skill-item">ACCA (in progress)</div>
-    <div class="skill-item">Data Cross-validation</div>
-  </div>
-</section>
-
-<section class="contact">
-  <h2>Let's Connect</h2>
-  <p>Quan tâm đến công việc FP&A / Finance BI? Liên hệ với mình.</p>
-  <a href="mailto:hoanghuanlx2003@gmail.com" class="btn">Gửi Email</a>
-</section>
