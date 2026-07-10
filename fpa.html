@@ -50,12 +50,16 @@
     /* NAVBAR */
     .navbar {
       position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
-      background: rgba(248, 249, 252, 0.8);
+      background: rgba(15, 23, 42, 0.6);
       backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-      border-bottom: 1px solid var(--border-light);
-      transition: var(--transition);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      transition: all 0.4s ease;
     }
-    .navbar.scrolled { background: rgba(255,255,255,0.95); box-shadow: var(--shadow-sm); }
+    .navbar.scrolled { background: rgba(255,255,255,0.95); box-shadow: var(--shadow-sm); border-bottom-color: var(--border-light); }
+    .navbar:not(.scrolled) .nav-logo { color: #f1f5f9; }
+    .navbar:not(.scrolled) .nav-links a { color: #cbd5e1; }
+    .navbar:not(.scrolled) .nav-links a:hover,
+    .navbar:not(.scrolled) .nav-links a.active { color: #818cf8; background: rgba(129,140,248,0.12); }
     .nav-inner {
       max-width: 1140px; margin: 0 auto;
       display: flex; align-items: center; justify-content: space-between;
@@ -81,29 +85,31 @@
     .hero {
       min-height: 100vh; display: flex; align-items: center;
       padding: 120px 2rem 80px; position: relative;
-      background: url('hero-bg.jpg') center/cover no-repeat fixed;
+      background: url('hero-bg.jpg') center/cover no-repeat;
+      background-attachment: fixed;
     }
     .hero::after {
       content: ''; position: absolute; inset: 0;
-      background: rgba(255,255,255,0.72);
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.82) 0%, rgba(30, 41, 59, 0.75) 50%, rgba(15, 23, 42, 0.85) 100%);
       z-index: 0;
     }
     .hero > * { position: relative; z-index: 1; }
     .hero-inner { max-width: 1140px; margin: 0 auto; width: 100%; display: grid; grid-template-columns: 1fr 420px; gap: 4rem; align-items: center; position: relative; z-index: 1; }
     .hero-badge {
       display: inline-flex; align-items: center; gap: 8px;
-      background: var(--green-bg); color: var(--green);
+      background: rgba(16, 185, 129, 0.15); color: #34d399;
       padding: 6px 16px; border-radius: 20px; font-size: 0.82rem; font-weight: 600;
-      margin-bottom: 1.5rem;
+      margin-bottom: 1.5rem; backdrop-filter: blur(8px);
+      border: 1px solid rgba(16, 185, 129, 0.2);
     }
-    .hero-badge::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--green); }
+    .hero-badge::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: #34d399; }
     .hero h1 {
       font-family: var(--font-display); font-size: 3.2rem; font-weight: 700;
-      line-height: 1.15; letter-spacing: -1.5px; color: var(--text);
+      line-height: 1.15; letter-spacing: -1.5px; color: #f1f5f9;
       margin-bottom: 1.25rem;
     }
-    .hero h1 em { font-style: normal; color: var(--accent); }
-    .hero-desc { font-size: 1.05rem; color: var(--text-secondary); line-height: 1.8; margin-bottom: 2rem; max-width: 520px; }
+    .hero h1 em { font-style: normal; color: #818cf8; }
+    .hero-desc { font-size: 1.05rem; color: #cbd5e1; line-height: 1.8; margin-bottom: 2rem; max-width: 520px; }
     .hero-btns { display: flex; gap: 1rem; flex-wrap: wrap; }
     .btn {
       display: inline-flex; align-items: center; gap: 8px;
@@ -111,15 +117,17 @@
       font-family: var(--font); font-size: 0.9rem; font-weight: 600;
       cursor: pointer; border: none; transition: var(--transition);
     }
-    .btn-primary { background: var(--accent); color: #fff; }
-    .btn-primary:hover { background: var(--accent-light); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(79,70,229,0.25); color: #fff; }
-    .btn-outline { background: var(--bg-white); color: var(--text); border: 1.5px solid var(--border); }
-    .btn-outline:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-2px); }
+    .btn-primary { background: #818cf8; color: #fff; }
+    .btn-primary:hover { background: #a5b4fc; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(129,140,248,0.35); color: #fff; }
+    .btn-outline { background: rgba(255,255,255,0.08); color: #e2e8f0; border: 1.5px solid rgba(255,255,255,0.2); backdrop-filter: blur(8px); }
+    .btn-outline:hover { border-color: #818cf8; color: #818cf8; transform: translateY(-2px); background: rgba(255,255,255,0.12); }
 
     /* Profile Card */
     .profile-card {
-      background: var(--bg-white); border: 1px solid var(--border-light);
-      border-radius: var(--radius); padding: 2rem; box-shadow: var(--shadow);
+      background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15);
+      border-radius: var(--radius); padding: 2rem;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
     }
     .profile-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
     .profile-avatar {
@@ -128,16 +136,17 @@
       display: flex; align-items: center; justify-content: center;
       color: #fff; font-family: var(--font-display); font-weight: 700; font-size: 1.1rem;
     }
-    .profile-name { font-family: var(--font-display); font-weight: 700; font-size: 1.1rem; }
-    .profile-role { color: var(--text-muted); font-size: 0.85rem; }
+    .profile-name { font-family: var(--font-display); font-weight: 700; font-size: 1.1rem; color: #f1f5f9; }
+    .profile-role { color: #94a3b8; font-size: 0.85rem; }
     .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     .stat-card {
-      background: var(--bg-subtle); border-radius: var(--radius-sm);
+      background: rgba(255,255,255,0.06); border-radius: var(--radius-sm);
       padding: 1rem; text-align: center; transition: var(--transition);
+      border: 1px solid rgba(255,255,255,0.08);
     }
-    .stat-card:hover { background: var(--accent-bg); }
-    .stat-value { font-family: var(--font-display); font-size: 1.4rem; font-weight: 700; color: var(--accent); }
-    .stat-label { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; font-weight: 500; }
+    .stat-card:hover { background: rgba(129,140,248,0.12); border-color: rgba(129,140,248,0.2); }
+    .stat-value { font-family: var(--font-display); font-size: 1.4rem; font-weight: 700; color: #818cf8; }
+    .stat-label { font-size: 0.75rem; color: #94a3b8; margin-top: 2px; font-weight: 500; }
 
     /* SECTIONS */
     .section { padding: 100px 2rem; }
