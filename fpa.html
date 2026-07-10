@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Huynh Lam Hoang Huan | FP&A Portfolio</title>
+  <meta name="description" content="FP&A Portfolio — Huynh Lam Hoang Huan. Budgeting, forecasting, variance analysis, financial reporting, KPI dashboards, and Excel-based modeling.">
+  <meta name="author" content="Huynh Lam Hoang Huan">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #f8f9fc;
+      --bg-white: #ffffff;
+      --bg-subtle: #f0f2f8;
+      --bg-accent: #eef2ff;
+      --border: #e2e6f0;
+      --border-light: #edf0f7;
+      --text: #1a1f36;
+      --text-secondary: #5e6687;
+      --text-muted: #8e94b2;
+      --accent: #4f46e5;
+      --accent-light: #6366f1;
+      --accent-bg: rgba(79, 70, 229, 0.08);
+      --green: #059669;
+      --green-bg: rgba(5, 150, 105, 0.08);
+      --orange: #ea580c;
+      --orange-bg: rgba(234, 88, 12, 0.08);
+      --blue: #0284c7;
+      --blue-bg: rgba(2, 132, 199, 0.08);
+      --font: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-display: 'Space Grotesk', sans-serif;
+      --radius: 16px;
+      --radius-sm: 10px;
+      --radius-xs: 6px;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.06);
+      --shadow: 0 4px 20px rgba(0,0,0,0.06);
+      --shadow-lg: 0 10px 40px rgba(0,0,0,0.08);
+      --transition: 0.25s ease;
+    }
+    html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+    body { font-family: var(--font); background: var(--bg); color: var(--text); line-height: 1.7; overflow-x: hidden; }
+    a { color: var(--accent); text-decoration: none; transition: var(--transition); }
+    a:hover { color: var(--accent-light); }
+    ::selection { background: var(--accent); color: #fff; }
+
+    /* NAVBAR */
+    .navbar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+      background: rgba(248, 249, 252, 0.8);
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-light);
+      transition: var(--transition);
+    }
+    .navbar.scrolled { background: rgba(255,255,255,0.95); box-shadow: var(--shadow-sm); }
+    .nav-inner {
+      max-width: 1140px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 2rem; height: 68px;
+    }
+    .nav-logo { font-family: var(--font-display); font-size: 1.2rem; font-weight: 700; color: var(--text); letter-spacing: -0.5px; }
+    .nav-logo span { color: var(--accent); }
+    .nav-links { display: flex; gap: 0.25rem; list-style: none; }
+    .nav-links a {
+      padding: 0.45rem 1rem; border-radius: var(--radius-xs);
+      color: var(--text-secondary); font-size: 0.88rem; font-weight: 500;
+    }
+    .nav-links a:hover, .nav-links a.active { color: var(--accent); background: var(--accent-bg); }
+    .nav-cta {
+      padding: 0.45rem 1.2rem !important;
+      background: var(--accent) !important; color: #fff !important;
+      border-radius: var(--radius-sm) !important; font-weight: 600 !important;
+    }
+    .nav-cta:hover { background: var(--accent-light) !important; }
+    .menu-toggle { display: none; background: none; border: none; color: var(--text); font-size: 1.4rem; cursor: pointer; }
+
+    /* HERO */
+    .hero {
+      min-height: 100vh; display: flex; align-items: center;
+      padding: 120px 2rem 80px; position: relative;
+      background: linear-gradient(170deg, #eef2ff 0%, #f8f9fc 50%, #fff 100%);
+    }
+    .hero::before {
+      content: ''; position: absolute; top: -80px; right: -120px;
+      width: 500px; height: 500px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(79,70,229,0.06) 0%, transparent 70%);
+    }
+    .hero::after {
+      content: ''; position: absolute; bottom: -60px; left: -100px;
+      width: 400px; height: 400px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(5,150,105,0.05) 0%, transparent 70%);
+    }
+    .hero-inner { max-width: 1140px; margin: 0 auto; width: 100%; display: grid; grid-template-columns: 1fr 420px; gap: 4rem; align-items: center; position: relative; z-index: 1; }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--green-bg); color: var(--green);
+      padding: 6px 16px; border-radius: 20px; font-size: 0.82rem; font-weight: 600;
+      margin-bottom: 1.5rem;
+    }
+    .hero-badge::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--green); }
+    .hero h1 {
+      font-family: var(--font-display); font-size: 3.2rem; font-weight: 700;
+      line-height: 1.15; letter-spacing: -1.5px; color: var(--text);
+      margin-bottom: 1.25rem;
+    }
+    .hero h1 em { font-style: normal; color: var(--accent); }
+    .hero-desc { font-size: 1.05rem; color: var(--text-secondary); line-height: 1.8; margin-bottom: 2rem; max-width: 520px; }
+    .hero-btns { display: flex; gap: 1rem; flex-wrap: wrap; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 0.7rem 1.5rem; border-radius: var(--radius-sm);
+      font-family: var(--font); font-size: 0.9rem; font-weight: 600;
+      cursor: pointer; border: none; transition: var(--transition);
+    }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: var(--accent-light); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(79,70,229,0.25); color: #fff; }
+    .btn-outline { background: var(--bg-white); color: var(--text); border: 1.5px solid var(--border); }
+    .btn-outline:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-2px); }
+
+    /* Profile Card */
+    .profile-card {
+      background: var(--bg-white); border: 1px solid var(--border-light);
+      border-radius: var(--radius); padding: 2rem; box-shadow: var(--shadow);
+    }
+    .profile-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
+    .profile-avatar {
+      width: 54px; height: 54px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--green));
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-family: var(--font-display); font-weight: 700; font-size: 1.1rem;
+    }
+    .profile-name { font-family: var(--font-display); font-weight: 700; font-size: 1.1rem; }
+    .profile-role { color: var(--text-muted); font-size: 0.85rem; }
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .stat-card {
+      background: var(--bg-subtle); border-radius: var(--radius-sm);
+      padding: 1rem; text-align: center; transition: var(--transition);
+    }
+    .stat-card:hover { background: var(--accent-bg); }
+    .stat-value { font-family: var(--font-display); font-size: 1.4rem; font-weight: 700; color: var(--accent); }
+    .stat-label { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; font-weight: 500; }
+
+    /* SECTIONS */
+    .section { padding: 100px 2rem; }
+    .section-alt { background: var(--bg-white); }
+    .section-inner { max-width: 1140px; margin: 0 auto; }
+    .section-label {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px;
+      color: var(--accent); margin-bottom: 0.75rem;
+    }
+    .section-title { font-family: var(--font-display); font-size: 2.2rem; font-weight: 700; letter-spacing: -1px; margin-bottom: 0.5rem; }
+    .section-desc { color: var(--text-secondary); font-size: 1rem; max-width: 600px; }
+    .section-head { margin-bottom: 3rem; }
+
+    /* ABOUT */
+    .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: start; }
+    .about-text { font-size: 1rem; color: var(--text-secondary); line-height: 1.85; }
+    .about-text p + p { margin-top: 1rem; }
+    .about-highlights { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .highlight-card {
+      background: var(--bg-white); border: 1px solid var(--border-light);
+      border-radius: var(--radius-sm); padding: 1.25rem; transition: var(--transition);
+    }
+    .highlight-card:hover { box-shadow: var(--shadow); border-color: var(--accent); }
+    .highlight-icon {
+      width: 40px; height: 40px; border-radius: var(--radius-xs);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem; margin-bottom: 0.75rem;
+    }
+    .highlight-icon.purple { background: var(--accent-bg); color: var(--accent); }
+    .highlight-icon.green { background: var(--green-bg); color: var(--green); }
+    .highlight-icon.orange { background: var(--orange-bg); color: var(--orange); }
+    .highlight-icon.blue { background: var(--blue-bg); color: var(--blue); }
+    .highlight-card h4 { font-size: 0.92rem; font-weight: 600; margin-bottom: 4px; }
+    .highlight-card p { font-size: 0.8rem; color: var(--text-muted); line-height: 1.5; }
+
+    /* CV / EXPERIENCE */
+    .cv-layout { display: grid; grid-template-columns: 1fr 340px; gap: 3rem; }
+    .cv-head-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 3rem; flex-wrap: wrap; gap: 1rem; }
+    .timeline-item {
+      position: relative; padding-left: 2rem; padding-bottom: 2.5rem;
+      border-left: 2px solid var(--border);
+    }
+    .timeline-item:last-child { padding-bottom: 0; }
+    .timeline-item.current { border-left-color: var(--accent); }
+    .timeline-dot {
+      position: absolute; left: -7px; top: 4px;
+      width: 12px; height: 12px; border-radius: 50%;
+      background: var(--bg); border: 2px solid var(--border);
+    }
+    .timeline-item.current .timeline-dot { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-bg); }
+    .timeline-date { font-size: 0.78rem; color: var(--accent); font-weight: 600; margin-bottom: 4px; }
+    .timeline-role { font-size: 1.05rem; font-weight: 700; margin-bottom: 2px; }
+    .timeline-company { font-size: 0.88rem; color: var(--text-muted); margin-bottom: 8px; }
+    .timeline-desc { font-size: 0.88rem; color: var(--text-secondary); line-height: 1.7; }
+    .sidebar-card {
+      background: var(--bg-white); border: 1px solid var(--border-light);
+      border-radius: var(--radius-sm); padding: 1.25rem; margin-bottom: 1rem;
+    }
+    .sidebar-card h4 { font-size: 0.88rem; font-weight: 700; margin-bottom: 0.75rem; color: var(--text); }
+    .tag-list { display: flex; flex-wrap: wrap; gap: 6px; }
+    .tag {
+      display: inline-block; padding: 4px 12px; border-radius: 20px;
+      font-size: 0.78rem; font-weight: 500; background: var(--bg-subtle); color: var(--text-secondary);
+      transition: var(--transition);
+    }
+    .tag:hover { background: var(--accent-bg); color: var(--accent); }
+
+    /* PROJECTS */
+    .project-tabs { display: flex; gap: 8px; margin-bottom: 2rem; flex-wrap: wrap; }
+    .tab-btn {
+      padding: 8px 18px; border-radius: 20px; border: 1.5px solid var(--border);
+      background: var(--bg-white); color: var(--text-secondary);
+      font-family: var(--font); font-size: 0.85rem; font-weight: 500; cursor: pointer;
+      transition: var(--transition); display: flex; align-items: center; gap: 6px;
+    }
+    .tab-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .tab-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .projects-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 1.5rem; }
+    .project-card {
+      background: var(--bg-white); border: 1px solid var(--border-light);
+      border-radius: var(--radius); overflow: hidden; transition: var(--transition);
+    }
+    .project-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-4px); }
+    .project-card.hidden { display: none; }
+    .project-banner {
+      height: 140px; display: flex; align-items: center; justify-content: center;
+      font-size: 2.5rem; color: #fff; position: relative;
+    }
+    .project-banner.budget { background: linear-gradient(135deg, #4f46e5, #6366f1); }
+    .project-banner.forecast { background: linear-gradient(135deg, #059669, #34d399); }
+    .project-banner.report { background: linear-gradient(135deg, #0284c7, #38bdf8); }
+    .project-banner.dashboard { background: linear-gradient(135deg, #ea580c, #fb923c); }
+    .project-banner.model { background: linear-gradient(135deg, #7c3aed, #a78bfa); }
+    .project-body { padding: 1.25rem 1.5rem 1.5rem; }
+    .project-cat {
+      display: inline-block; font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 1px; color: var(--accent); margin-bottom: 6px;
+    }
+    .project-body h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 8px; line-height: 1.4; }
+    .project-body p { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.65; margin-bottom: 1rem; }
+    .project-tools { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 1rem; }
+    .tool-tag { padding: 3px 10px; border-radius: 4px; font-size: 0.72rem; font-weight: 600; background: var(--bg-subtle); color: var(--text-muted); }
+    .project-link { font-size: 0.85rem; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
+
+    /* CONTACT */
+    .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; }
+    .contact-item {
+      display: flex; align-items: center; gap: 1rem; padding: 1rem 1.25rem;
+      background: var(--bg-white); border: 1px solid var(--border-light);
+      border-radius: var(--radius-sm); margin-bottom: 0.75rem;
+      transition: var(--transition); color: var(--text);
+    }
+    .contact-item:hover { border-color: var(--accent); box-shadow: var(--shadow-sm); }
+    .contact-icon {
+      width: 42px; height: 42px; border-radius: var(--radius-xs);
+      background: var(--accent-bg); color: var(--accent);
+      display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0;
+    }
+    .contact-label { font-size: 0.75rem; color: var(--text-muted); font-weight: 500; }
+    .contact-value { font-size: 0.9rem; font-weight: 600; }
+    .contact-form-box {
+      background: var(--bg-white); border: 1px solid var(--border-light);
+      border-radius: var(--radius); padding: 2rem;
+    }
+    .contact-form-box h3 { font-family: var(--font-display); font-size: 1.2rem; font-weight: 700; margin-bottom: 1.25rem; }
+    .form-group { margin-bottom: 1rem; }
+    .form-group label { display: block; font-size: 0.82rem; font-weight: 600; margin-bottom: 4px; color: var(--text); }
+    .form-group input, .form-group textarea {
+      width: 100%; padding: 0.65rem 0.9rem; border: 1.5px solid var(--border);
+      border-radius: var(--radius-xs); font-family: var(--font); font-size: 0.9rem;
+      transition: var(--transition); background: var(--bg); color: var(--text);
+    }
+    .form-group input:focus, .form-group textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-bg); }
+    .form-group textarea { min-height: 100px; resize: vertical; }
+
+    /* FOOTER */
+    footer {
+      text-align: center; padding: 3rem 2rem;
+      border-top: 1px solid var(--border-light); color: var(--text-muted); font-size: 0.85rem;
+    }
+    .footer-links { display: flex; justify-content: center; gap: 1.5rem; margin-bottom: 1rem; }
+    .footer-links a {
+      width: 38px; height: 38px; border-radius: 50%;
+      background: var(--bg-subtle); color: var(--text-secondary);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem; transition: var(--transition);
+    }
+    .footer-links a:hover { background: var(--accent); color: #fff; }
+    .switch-link { display: inline-flex; align-items: center; gap: 6px; margin-top: 0.75rem; font-size: 0.82rem; font-weight: 600; }
+
+    /* FADE IN */
+    .fade-in { opacity: 0; transform: translateY(30px); transition: opacity 0.6s ease, transform 0.6s ease; }
+    .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+    /* RESPONSIVE */
+    @media (max-width: 900px) {
+      .hero-inner { grid-template-columns: 1fr; }
+      .profile-card { max-width: 420px; }
+      .about-grid, .cv-layout, .contact-grid { grid-template-columns: 1fr; }
+      .about-highlights { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 640px) {
+      .hero h1 { font-size: 2.2rem; }
+      .nav-links { display: none; position: fixed; top: 68px; left: 0; right: 0; background: var(--bg-white); flex-direction: column; padding: 1rem; border-bottom: 1px solid var(--border); box-shadow: var(--shadow); }
+      .nav-links.open { display: flex; }
+      .menu-toggle { display: block; }
+      .projects-grid { grid-template-columns: 1fr; }
+      .about-highlights { grid-template-columns: 1fr; }
+      .section-title { font-size: 1.8rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar" id="navbar">
+  <div class="nav-inner">
+    <a href="#" class="nav-logo">HLHH<span>.</span>FPA</a>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#about">About</a></li>
+      <li><a href="#cv">CV</a></li>
+      <li><a href="#projects">Projects</a></li>
+      <li><a href="#contact" class="nav-cta">Contact</a></li>
+    </ul>
+    <button class="menu-toggle" id="menuToggle" aria-label="Menu"><i class="fas fa-bars"></i></button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-content">
+      <div class="hero-badge">Open to opportunities</div>
+      <h1><em>FP&A</em> &amp; Financial<br>Planning Analyst.</h1>
+      <p class="hero-desc">
+        Finance graduate with hands-on experience in budgeting, forecasting, variance analysis, and financial reporting. Skilled in building Excel-based models, KPI dashboards, and translating data into actionable business insights. ACCA candidate.
+      </p>
+      <div class="hero-btns">
+        <a href="#projects" class="btn btn-primary"><i class="fas fa-chart-bar"></i> View Projects</a>
+        <a href="#cv" class="btn btn-outline"><i class="fas fa-file-alt"></i> View CV</a>
+      </div>
+    </div>
+    <div class="profile-card">
+      <div class="profile-header">
+        <div class="profile-avatar">HH</div>
+        <div>
+          <div class="profile-name">Huynh Lam Hoang Huan</div>
+          <div class="profile-role">FP&A &amp; Financial Planning</div>
+        </div>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value">KPMG</div>
+          <div class="stat-label">Big 4 Experience</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">ACCA</div>
+          <div class="stat-label">Candidate</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">3.09</div>
+          <div class="stat-label">GPA / 4.0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">Top 5</div>
+          <div class="stat-label">ACCA Finhack 2024</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section class="section section-alt fade-in" id="about">
+  <div class="section-inner">
+    <div class="section-head">
+      <div class="section-label"><i class="fas fa-user"></i> About</div>
+      <h2 class="section-title">Planning-driven finance mindset.</h2>
+    </div>
+    <div class="about-grid">
+      <div class="about-text">
+        <p>I'm a Corporate Finance graduate from International University (VNU-HCM) with practical experience at KPMG and the Co-operative Bank of Vietnam. My interest in FP&A stems from the belief that strong financial planning creates the foundation for better business decisions.</p>
+        <p>During my time at KPMG, I developed skills in structuring financial data, building Excel models, reconciling accounts, and preparing IFRS-compliant reports. At Co-operative Bank, I gained exposure to credit analysis, data verification, and finance operations. These experiences shaped my analytical approach to budgeting, forecasting, and variance analysis.</p>
+        <p>Currently pursuing ACCA certification, I'm building toward a career in FP&A where I can combine financial modeling, reporting, and data visualization to support strategic planning.</p>
+      </div>
+      <div class="about-highlights">
+        <div class="highlight-card">
+          <div class="highlight-icon purple"><i class="fas fa-chart-pie"></i></div>
+          <h4>Budgeting & Forecasting</h4>
+          <p>Budget preparation, revenue forecasting, and scenario planning.</p>
+        </div>
+        <div class="highlight-card">
+          <div class="highlight-icon green"><i class="fas fa-balance-scale"></i></div>
+          <h4>Variance Analysis</h4>
+          <p>Actual vs. budget analysis, variance reporting, and root cause identification.</p>
+        </div>
+        <div class="highlight-card">
+          <div class="highlight-icon orange"><i class="fas fa-tachometer-alt"></i></div>
+          <h4>KPI Dashboards</h4>
+          <p>Power BI dashboards, Excel reporting, and performance tracking.</p>
+        </div>
+        <div class="highlight-card">
+          <div class="highlight-icon blue"><i class="fas fa-file-invoice-dollar"></i></div>
+          <h4>Financial Reporting</h4>
+          <p>IFRS-compliant statements, management reports, and data consolidation.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CV / EXPERIENCE -->
+<section class="section fade-in" id="cv">
+  <div class="section-inner">
+    <div class="cv-head-row">
+      <div>
+        <div class="section-label"><i class="fas fa-briefcase"></i> Experience & Education</div>
+        <h2 class="section-title">Career journey.</h2>
+      </div>
+      <a href="assets/CV_HuynhLamHoangHuan.pdf" target="_blank" class="btn btn-outline"><i class="fas fa-download"></i> Download CV</a>
+    </div>
+    <div class="cv-layout">
+      <div class="timeline">
+        <div class="timeline-item current">
+          <div class="timeline-dot"></div>
+          <div class="timeline-date">Nov 2025 &ndash; Apr 2026</div>
+          <div class="timeline-role">Financial Due Diligence Intern</div>
+          <div class="timeline-company">KPMG Tax and Advisory Limited Branch &mdash; Deals Advisory</div>
+          <div class="timeline-desc">Extracted and structured financial data into Excel models for due diligence reports. Performed GL/trial balance reconciliations, prepared IFRS-compliant financial statements, and processed datasets using Power Query, Power BI, and Pivot Tables across multiple sectors.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-date">Jun 2024 &ndash; Oct 2024</div>
+          <div class="timeline-role">Finance Intern</div>
+          <div class="timeline-company">Co-operative Bank of Vietnam</div>
+          <div class="timeline-desc">Cross-checked and inputted financial data into internal systems, verified documentation accuracy, conducted credit and financial metrics analysis of business clients, and supported day-to-day finance operations.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-date">Oct 2021 &ndash; May 2026</div>
+          <div class="timeline-role">Bachelor of Corporate Finance</div>
+          <div class="timeline-company">International University &mdash; VNU-HCM</div>
+          <div class="timeline-desc">GPA: 3.09/4.0. Top coursework: Financial Institutions Management (94), Auditing (88), Corporate Finance (82), Business Analysis & Evaluation (81). Top 5 Finalist &ndash; ACCA Virtual Finhack 2024. Academic Encouragement Scholarship.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-date">2024 &ndash; Present</div>
+          <div class="timeline-role">ACCA Candidate</div>
+          <div class="timeline-company">Association of Chartered Certified Accountants</div>
+          <div class="timeline-desc">Passed: FA/F3, FR/F7. Pending: PM/F5. Studying: AA/F8, FM/F9. Diploma in Accounting and Business obtained.</div>
+        </div>
+      </div>
+      <div class="cv-sidebar">
+        <div class="sidebar-card">
+          <h4>FP&A Skills</h4>
+          <div class="tag-list">
+            <span class="tag">Budgeting & Forecasting</span>
+            <span class="tag">Variance Analysis</span>
+            <span class="tag">Financial Modeling</span>
+            <span class="tag">KPI Reporting</span>
+            <span class="tag">IFRS Reporting</span>
+            <span class="tag">GL Reconciliation</span>
+            <span class="tag">Management Reporting</span>
+          </div>
+        </div>
+        <div class="sidebar-card">
+          <h4>Technical Skills</h4>
+          <div class="tag-list">
+            <span class="tag">Excel (PivotTable, Power Query)</span>
+            <span class="tag">Power BI</span>
+            <span class="tag">PowerPoint</span>
+            <span class="tag">AI in Finance</span>
+          </div>
+        </div>
+        <div class="sidebar-card">
+          <h4>Languages</h4>
+          <div class="tag-list">
+            <span class="tag">Vietnamese (Native)</span>
+            <span class="tag">English (Fluent &mdash; IELTS 6.0)</span>
+          </div>
+        </div>
+        <div class="sidebar-card">
+          <h4>Certifications</h4>
+          <div class="tag-list">
+            <span class="tag">ACCA Diploma in Accounting & Business</span>
+            <span class="tag">Microsoft Office Specialist</span>
+            <span class="tag">Financial Modeling (Coursera)</span>
+            <span class="tag">Financial Analysis & Valuation (Coursera)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROJECTS -->
+<section class="section section-alt fade-in" id="projects">
+  <div class="section-inner">
+    <div class="section-head">
+      <div class="section-label"><i class="fas fa-rocket"></i> Projects</div>
+      <h2 class="section-title">FP&A and financial planning work.</h2>
+      <p class="section-desc">Academic projects, coursework, and competitions focused on budgeting, modeling, reporting, and data-driven analysis.</p>
+    </div>
+
+    <div class="project-tabs">
+      <button class="tab-btn active" data-filter="all">All Projects</button>
+      <button class="tab-btn" data-filter="budget"><i class="fas fa-calculator"></i> Budgeting</button>
+      <button class="tab-btn" data-filter="model"><i class="fas fa-chart-line"></i> Modeling</button>
+      <button class="tab-btn" data-filter="report"><i class="fas fa-file-alt"></i> Reporting</button>
+    </div>
+
+    <div class="projects-grid" id="projectsGrid">
+
+      <div class="project-card" data-category="model">
+        <div class="project-banner model"><i class="fas fa-chart-line"></i></div>
+        <div class="project-body">
+          <div class="project-cat">Financial Modeling</div>
+          <h3>3-Statement Financial Model &mdash; Binh Duong Water Environment JSC</h3>
+          <p>Built a full 3-statement model (P&L, BS, CF) with industry-aligned assumptions, horizontal &amp; vertical analysis, scenario simulation (best/worst case), and KPI evaluation. Scored 90/100.</p>
+          <div class="project-tools">
+            <span class="tool-tag">Excel</span>
+            <span class="tool-tag">Scenario Analysis</span>
+            <span class="tool-tag">3-Statement</span>
+          </div>
+          <a href="#" class="project-link"><i class="fab fa-github"></i> GitHub</a>
+        </div>
+      </div>
+
+      <div class="project-card" data-category="report">
+        <div class="project-banner report"><i class="fas fa-file-invoice-dollar"></i></div>
+        <div class="project-body">
+          <div class="project-cat">Financial Reporting</div>
+          <h3>Corporate Financial Statement Analysis</h3>
+          <p>Coursera-certified project analyzing financial statements using ratio analysis, trend identification, and performance benchmarking for investment decision support.</p>
+          <div class="project-tools">
+            <span class="tool-tag">Excel</span>
+            <span class="tool-tag">Ratio Analysis</span>
+            <span class="tool-tag">Coursera</span>
+          </div>
+          <a href="#" class="project-link"><i class="fas fa-certificate"></i> Certificate</a>
+        </div>
+      </div>
+
+      <div class="project-card" data-category="budget">
+        <div class="project-banner budget"><i class="fas fa-calculator"></i></div>
+        <div class="project-body">
+          <div class="project-cat">Budgeting & Planning</div>
+          <h3>KPMG &mdash; Multi-Sector Financial Data Structuring</h3>
+          <p>Structured financial data from target companies into Excel-based analytical models. Reconciled GL/trial balance accounts and prepared budget-ready financial summaries across real estate, manufacturing, energy, and confectionery sectors.</p>
+          <div class="project-tools">
+            <span class="tool-tag">Excel</span>
+            <span class="tool-tag">Power Query</span>
+            <span class="tool-tag">IFRS</span>
+            <span class="tool-tag">Power BI</span>
+          </div>
+          <a href="#" class="project-link"><i class="fas fa-lock"></i> Confidential</a>
+        </div>
+      </div>
+
+      <div class="project-card" data-category="report">
+        <div class="project-banner dashboard"><i class="fas fa-tachometer-alt"></i></div>
+        <div class="project-body">
+          <div class="project-cat">KPI Dashboard</div>
+          <h3>Co-op Bank &mdash; Financial Metrics & Credit Analysis</h3>
+          <p>Conducted credit and financial metrics analysis of business clients at Co-operative Bank of Vietnam. Verified data accuracy, cross-checked financial documentation, and supported operational reporting.</p>
+          <div class="project-tools">
+            <span class="tool-tag">Credit Analysis</span>
+            <span class="tool-tag">Data Verification</span>
+            <span class="tool-tag">Internal Systems</span>
+          </div>
+          <a href="#" class="project-link"><i class="fas fa-building"></i> Work Experience</a>
+        </div>
+      </div>
+
+      <div class="project-card" data-category="model">
+        <div class="project-banner forecast"><i class="fas fa-trophy"></i></div>
+        <div class="project-body">
+          <div class="project-cat">Competition</div>
+          <h3>ACCA Virtual Finhack 2024 &mdash; Top 5 Finalist</h3>
+          <p>National finance competition by ACCA Vietnam. Delivered financial analysis, budget planning presentations, and team-based problem-solving under time pressure. Reached Top 5 out of all participating teams.</p>
+          <div class="project-tools">
+            <span class="tool-tag">Financial Analysis</span>
+            <span class="tool-tag">Presentation</span>
+            <span class="tool-tag">Teamwork</span>
+          </div>
+          <a href="#" class="project-link"><i class="fas fa-award"></i> Achievement</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section class="section fade-in" id="contact">
+  <div class="section-inner">
+    <div class="section-head">
+      <div class="section-label"><i class="fas fa-envelope"></i> Contact</div>
+      <h2 class="section-title">Let's connect.</h2>
+      <p class="section-desc">Available for FP&A, financial planning, and business analysis roles in Vietnam and internationally.</p>
+    </div>
+    <div class="contact-grid">
+      <div>
+        <a href="mailto:hoanghuanlx2003@gmail.com" class="contact-item">
+          <div class="contact-icon"><i class="fas fa-envelope"></i></div>
+          <div><div class="contact-label">Email</div><div class="contact-value">hoanghuanlx2003@gmail.com</div></div>
+        </a>
+        <a href="tel:+84949938590" class="contact-item">
+          <div class="contact-icon"><i class="fas fa-phone"></i></div>
+          <div><div class="contact-label">Phone</div><div class="contact-value">(+84) 949 938 590</div></div>
+        </a>
+        <a href="https://linkedin.com/in/huanhuynh22" target="_blank" class="contact-item">
+          <div class="contact-icon"><i class="fab fa-linkedin"></i></div>
+          <div><div class="contact-label">LinkedIn</div><div class="contact-value">linkedin.com/in/huanhuynh22</div></div>
+        </a>
+        <a href="https://github.com/huanbilly2003" target="_blank" class="contact-item">
+          <div class="contact-icon"><i class="fab fa-github"></i></div>
+          <div><div class="contact-label">GitHub</div><div class="contact-value">github.com/huanbilly2003</div></div>
+        </a>
+        <div class="contact-item">
+          <div class="contact-icon"><i class="fas fa-map-marker-alt"></i></div>
+          <div><div class="contact-label">Location</div><div class="contact-value">Thu Duc City, HCM City, Vietnam</div></div>
+        </div>
+      </div>
+      <div class="contact-form-box">
+        <h3>Send a message</h3>
+        <form action="https://formspree.io/f/your-form-id" method="POST">
+          <div class="form-group">
+            <label for="name">Name</label>
+            <input type="text" id="name" name="name" placeholder="Your name" required>
+          </div>
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" placeholder="your@email.com" required>
+          </div>
+          <div class="form-group">
+            <label for="message">Message</label>
+            <textarea id="message" name="message" placeholder="Tell me about the opportunity..." required></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;">
+            <i class="fas fa-paper-plane"></i> Send Message
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-links">
+    <a href="https://linkedin.com/in/huanhuynh22" target="_blank" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+    <a href="https://github.com/huanbilly2003" target="_blank" aria-label="GitHub"><i class="fab fa-github"></i></a>
+    <a href="mailto:hoanghuanlx2003@gmail.com" aria-label="Email"><i class="fas fa-envelope"></i></a>
+  </div>
+  <p>&copy; 2026 Huynh Lam Hoang Huan. Built with purpose.</p>
+  <a href="index.html" class="switch-link"><i class="fas fa-exchange-alt"></i> View M&A / FDD Portfolio</a>
+</footer>
+
+<script>
+  // Navbar scroll
+  const navbar = document.getElementById('navbar');
+  window.addEventListener('scroll', () => {
+    navbar.classList.toggle('scrolled', window.scrollY > 50);
+  });
+
+  // Mobile menu
+  document.getElementById('menuToggle').addEventListener('click', () => {
+    document.getElementById('navLinks').classList.toggle('open');
+  });
+
+  // Active link on scroll
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('.nav-links a');
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(s => {
+      if (window.scrollY >= s.offsetTop - 120) current = s.getAttribute('id');
+    });
+    navLinks.forEach(a => {
+      a.classList.toggle('active', a.getAttribute('href') === '#' + current && !a.classList.contains('nav-cta'));
+    });
+  });
+
+  // Fade in
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
+  }, { threshold: 0.15 });
+  document.querySelectorAll('.fade-in').forEach(el => obs.observe(el));
+
+  // Project filter
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const filter = btn.dataset.filter;
+      document.querySelectorAll('.project-card').forEach(card => {
+        card.classList.toggle('hidden', filter !== 'all' && card.dataset.category !== filter);
+      });
+    });
+  });
+</script>
+</body>
+</html>
